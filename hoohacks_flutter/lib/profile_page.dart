@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hoohacks/constant.dart';
+import 'package:hoohacks/edit_profile_info_page.dart';
 import 'package:hoohacks/firebase/firebase_auth.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 
@@ -48,9 +49,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
-                      signOut();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfileInfoPage(),
+                        ),
+                      );
                     },
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(2),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,37 +66,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               Icon(Icons.info),
                               SizedBox(width: 10),
                               Text("Bio"),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: TextField(
-                      controller: bioEditingController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: "Bio",
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  Divider(color: Theme.of(context).colorScheme.primary),
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () async {},
-                    child: const Padding(
-                      padding: EdgeInsets.all(2),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.delete),
-                              SizedBox(width: 10),
-                              Text("Delete Account"),
                             ],
                           ),
                           Icon(Icons.arrow_forward),
