@@ -4,6 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
 import 'package:hoohacks/models/activity_model.dart';
+import 'package:hoohacks/states/user_state.dart';
+import 'package:provider/provider.dart';
 
 class ActivityPage extends StatefulWidget {
   final ActivityModel activityModel;
@@ -15,13 +17,22 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> {
   bool isJoining = false;
+  late bool upvoted;
+  late bool downvoted;
 
   @override
   void initState() {
     isJoining = widget.activityModel.participants.contains(
       FirebaseAuth.instance.currentUser!.uid,
     );
-    print(widget.activityModel.participants);
+    upvoted = Provider.of<UserState>(
+      context,
+      listen: false,
+    ).userModel!.upvotedActivities.contains(widget.activityModel.id);
+    downvoted = Provider.of<UserState>(
+      context,
+      listen: false,
+    ).userModel!.downvotedActivities.contains(widget.activityModel.id);
     super.initState();
   }
 
@@ -114,6 +125,43 @@ class _ActivityPageState extends State<ActivityPage> {
                 ],
               ),
             ),
+          Padding(
+            padding: middleWidgetPadding,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        upvoted
+                            ? cancelUpvoteActivity(widget.activityModel.id!)
+                            : upvoteActivity(widget.activityModel.id!);
+                        upvoted = !upvoted;
+                      });
+                    },
+                    icon: const Icon(Icons.thumb_up),
+                    label: Text(upvoted ? "Cancel" : "Upvote"),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        downvoted
+                            ? cancelDownvoteActivity(widget.activityModel.id!)
+                            : downvoteActivity(widget.activityModel.id!);
+                        downvoted = !downvoted;
+                      });
+                    },
+                    icon: const Icon(Icons.thumb_down),
+                    label: Text(downvoted ? "Cancel" : "Downvote"),
+                  ),
+                ),
+              ],
+            ),
+          ),
           if (isJoining)
             Padding(
               padding: middleWidgetPadding,
@@ -124,7 +172,7 @@ class _ActivityPageState extends State<ActivityPage> {
                     isJoining = false;
                   });
                 },
-                child: Text("Leave Activity"),
+                child: const Text("Leave Activity"),
               ),
             ),
           if (!isJoining)
@@ -137,7 +185,7 @@ class _ActivityPageState extends State<ActivityPage> {
                     isJoining = true;
                   });
                 },
-                child: Text("Join Activity"),
+                child: const Text("Join Activity"),
               ),
             ),
         ],

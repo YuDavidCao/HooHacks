@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_auth.dart';
+import 'package:hoohacks/firebase/firebase_firestore.dart';
 import 'package:hoohacks/home_page.dart';
 
 class AuthenticationPage extends StatefulWidget {
@@ -153,6 +154,11 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
                 if (userCredential != null) {
                   await userCredential.user!.updateDisplayName(
                     _usernameController.text,
+                  );
+                  await createUser(
+                    _usernameController.text,
+                    _emailController.text,
+                    context,
                   );
                 }
               } else {

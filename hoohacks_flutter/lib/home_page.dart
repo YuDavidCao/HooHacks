@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hoohacks/activity_page.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/states/activity_state.dart';
+import 'package:hoohacks/states/user_state.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -41,6 +42,9 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        print(Provider.of<UserState>(context,listen:false).userModel);
+      }),
     );
   }
 }

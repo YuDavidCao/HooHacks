@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hoohacks/authentication_page.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/edit_profile_info_page.dart';
 import 'package:hoohacks/firebase/firebase_auth.dart';
@@ -101,6 +102,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AuthenticationPage(),
+                        ),
+                      );
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(2),
@@ -153,6 +160,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       );
                       if (confirmDelete) {
                         deleteAccount();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AuthenticationPage(),
+                          ),
+                        );
                       }
                     },
                     child: const Padding(
