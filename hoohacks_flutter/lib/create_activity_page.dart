@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
+import 'package:image_picker/image_picker.dart';
 
 class CreateActivityPage extends StatefulWidget {
   final LatLng location;
@@ -24,7 +27,19 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 1));
 
+  File? activityImage;
+
   final List<String> _categories = [];
+
+  void pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        activityImage = File(image.path);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -63,6 +78,11 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
         key: _formKey,
         child: ListView(
           children: [
+            if (activityImage != null)
+              Padding(
+                padding: middleWidgetPadding,
+                child: Image.file(activityImage!),
+              ),
             Container(
               padding: middleWidgetPadding,
               width: double.infinity,
@@ -289,34 +309,48 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            bool successful = await addActivity(
-              _titleController.text,
-              _descriptionController.text,
-              _categories.isNotEmpty ? _categories.first : '',
-              widget.location.latitude,
-              widget.location.longitude,
-              _startDate,
-              _endDate,
-              _categories,
-              _contactEmailController.text,
-            );
-            if (successful) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Activity created successfully!')),
-              );
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to create activity.')),
-              );
-            }
-          }
-        },
-        backgroundColor: const Color.fromARGB(255, 229, 114, 0),
-        child: const Icon(Icons.check),
+      floatingActionButton: Wrap(
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              pickImage();
+            },
+            backgroundColor: const Color.fromARGB(255, 229, 114, 0),
+            child: Icon(Icons.photo),
+          ),
+          const SizedBox(width: 10),
+          FloatingActionButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                bool successful = await addActivity(
+                  _titleController.text,
+                  _descriptionController.text,
+                  _categories.isNotEmpty ? _categories.first : '',
+                  widget.location.latitude,
+                  widget.location.longitude,
+                  _startDate,
+                  _endDate,
+                  _categories,
+                  _contactEmailController.text,
+                );
+                if (successful) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Activity created successfully!'),
+                    ),
+                  );
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to create activity.')),
+                  );
+                }
+              }
+            },
+            backgroundColor: const Color.fromARGB(255, 229, 114, 0),
+            child: const Icon(Icons.check),
+          ),
+        ],
       ),
     );
   }

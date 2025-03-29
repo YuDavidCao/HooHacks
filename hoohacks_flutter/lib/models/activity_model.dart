@@ -16,6 +16,7 @@ class ActivityModel {
   final int upvotes;
   final int downvotes;
   final bool organizationOnly;
+  final String? imageUrl;
 
   ActivityModel({
     this.id,
@@ -35,6 +36,7 @@ class ActivityModel {
     required this.upvotes,
     required this.downvotes,
     required this.organizationOnly,
+    this.imageUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -55,6 +57,7 @@ class ActivityModel {
       'Upvotes': upvotes,
       'Downvotes': downvotes,
       'OrganizationOnly': organizationOnly,
+      'ImageUrl': imageUrl,
     };
   }
 
@@ -77,6 +80,7 @@ class ActivityModel {
       upvotes: map['Upvotes'],
       downvotes: map['Downvotes'],
       organizationOnly: map['OrganizationOnly'],
+      imageUrl: map['ImageUrl'],
     );
   }
 }
