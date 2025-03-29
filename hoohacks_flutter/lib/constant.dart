@@ -19,6 +19,11 @@ const List<String> categories = [
   "Special Event",
   "Student Activity",
   "Workshop",
+  "1st Year",
+  "2nd Year",
+  "3rd Year",
+  "4th Year",
+  "Graduate",
 ];
 
 const List<String> distanceFilters = [
