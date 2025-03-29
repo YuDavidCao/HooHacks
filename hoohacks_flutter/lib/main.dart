@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/authentication_page.dart';
 import 'package:hoohacks/firebase_options.dart';
+import 'package:hoohacks/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,10 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 255, 64, 0),
         ),
       ),
-      home: const AuthenticationPage(),
+      home:
+          FirebaseAuth.instance.currentUser == null
+              ? const AuthenticationPage()
+              : const HomePage(),
     );
   }
 }
