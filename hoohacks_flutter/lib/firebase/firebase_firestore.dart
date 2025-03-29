@@ -43,3 +43,16 @@ Future<bool> addActivity(
   }
   return false;
 }
+
+Future<List<ActivityModel>> getActivities() async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    final snapshot = await firestore.collection('activities').get();
+    return snapshot.docs
+        .map((doc) => ActivityModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } catch (e) {
+    print("Error getting activities: $e");
+  }
+  return [];
+}

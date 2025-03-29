@@ -57,4 +57,26 @@ class ActivityModel {
       'OrganizationOnly': organizationOnly,
     };
   }
+
+  static ActivityModel fromMap(Map<String, dynamic> map, String id) {
+    return ActivityModel(
+      id: id,
+      publisher: map['Publisher'],
+      title: map['Title'],
+      description: map['Description'],
+      createdDate: DateTime.parse(map['CreatedDate']),
+      startDate: DateTime.parse(map['StartDate']),
+      endDate: DateTime.parse(map['EndDate']),
+      latitude: map['Latitude'],
+      longitude: map['Longitude'],
+      organization: map['Organization'],
+      categories: List<String>.from(map['Categories']),
+      participants: List<String>.from(map['Participants']),
+      limit: map['Limit'],
+      contactEmail: map['ContactEmail'],
+      upvotes: map['Upvotes'],
+      downvotes: map['Downvotes'],
+      organizationOnly: map['OrganizationOnly'],
+    );
+  }
 }

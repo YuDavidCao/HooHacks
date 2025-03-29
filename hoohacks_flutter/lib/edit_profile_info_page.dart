@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/constant.dart';
 
@@ -13,6 +14,15 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
       TextEditingController();
   final TextEditingController _bioEditingController = TextEditingController();
   final TextEditingController _emailEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    _usernameEditingController.text =
+        FirebaseAuth.instance.currentUser?.displayName ?? "";
+    _emailEditingController.text =
+        FirebaseAuth.instance.currentUser?.email ?? "";
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -40,7 +50,9 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                   labelText: "Username*",
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _usernameEditingController.clear();
+                    },
                     icon: Icon(Icons.delete),
                   ),
                 ),
@@ -60,7 +72,9 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                   labelText: "Email*",
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _emailEditingController.clear();
+                    },
                     icon: Icon(Icons.delete),
                   ),
                 ),
@@ -80,17 +94,31 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                 decoration: InputDecoration(
                   labelText: "Bio",
                   border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.delete),
-                  ),
                 ),
               ),
             ),
             Padding(
               padding: middleWidgetPadding,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  try {
+                    FirebaseAuth.instance.currentUser?.updateProfile(
+                      displayName: _usernameEditingController.text,
+                    );
+                    FirebaseAuth.instance.currentUser?.updateEmail(
+                      _emailEditingController.text,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Profile updated successfully"),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Error updating profile")),
+                    );
+                  }
+                },
                 child: const Text("Save Changes"),
               ),
             ),

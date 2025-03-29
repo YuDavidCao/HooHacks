@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hoohacks/authentication_page.dart';
 import 'package:hoohacks/firebase_options.dart';
 import 'package:hoohacks/home_page.dart';
+import 'package:hoohacks/states/activity_state.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,17 +18,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 255, 64, 0),
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => ActivityState())],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 255, 64, 0),
+          ),
         ),
+        home:
+            FirebaseAuth.instance.currentUser == null
+                ? const AuthenticationPage()
+                : const HomePage(),
       ),
-      home:
-          FirebaseAuth.instance.currentUser == null
-              ? const AuthenticationPage()
-              : const HomePage(),
     );
   }
 }

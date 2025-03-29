@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/edit_profile_info_page.dart';
@@ -27,7 +28,10 @@ class _ProfilePageState extends State<ProfilePage> {
               backgroundImage: AssetImage('assets/images/profile.png'),
             ),
             const SizedBox(height: 20),
-            const Text("HooHacks", style: TextStyle(fontSize: 20)),
+            Text(
+              FirebaseAuth.instance.currentUser!.displayName ?? "User",
+              style: TextStyle(fontSize: 20),
+            ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(10),
@@ -63,9 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.info),
+                              Icon(Icons.person),
                               SizedBox(width: 10),
-                              Text("Bio"),
+                              Text("Profile Info"),
                             ],
                           ),
                           Icon(Icons.arrow_forward),
