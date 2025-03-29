@@ -65,7 +65,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Activity'),
-        backgroundColor: const Color.fromARGB(255, 255, 64, 0),
+        backgroundColor: ctaColor,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -79,9 +79,27 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
         child: ListView(
           children: [
             if (activityImage != null)
-              Padding(
-                padding: middleWidgetPadding,
-                child: Image.file(activityImage!),
+              Stack(
+                children: [
+                  Padding(
+                    padding: middleWidgetPadding,
+                    child: Image.file(activityImage!),
+                  ),
+                  Positioned(
+                    right: 30,
+                    bottom: 20,
+                    child: FloatingActionButton(
+                      heroTag: null,
+                      onPressed: () {
+                        setState(() {
+                          activityImage = null;
+                        });
+                      },
+                      backgroundColor: ctaColor,
+                      child: Icon(Icons.delete),
+                    ),
+                  ),
+                ],
               ),
             Container(
               padding: middleWidgetPadding,
@@ -312,14 +330,16 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
       floatingActionButton: Wrap(
         children: [
           FloatingActionButton(
+            heroTag: null,
             onPressed: () {
               pickImage();
             },
-            backgroundColor: const Color.fromARGB(255, 229, 114, 0),
+            backgroundColor: ctaColor,
             child: Icon(Icons.photo),
           ),
           const SizedBox(width: 10),
           FloatingActionButton(
+            heroTag: null,
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 bool successful = await addActivity(
@@ -332,6 +352,8 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   _endDate,
                   _categories,
                   _contactEmailController.text,
+                  activityImage,
+                  context,
                 );
                 if (successful) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -347,7 +369,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                 }
               }
             },
-            backgroundColor: const Color.fromARGB(255, 229, 114, 0),
+            backgroundColor: ctaColor,
             child: const Icon(Icons.check),
           ),
         ],

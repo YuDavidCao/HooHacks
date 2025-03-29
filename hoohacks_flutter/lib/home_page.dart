@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hoohacks/activity_page.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/states/activity_state.dart';
 import 'package:provider/provider.dart';
@@ -24,10 +25,12 @@ class _HomePageState extends State<HomePage> {
                   title: Text(activity.title),
                   subtitle: Text(activity.description),
                   onTap: () {
-                    Navigator.pushNamed(
+                    Navigator.push(
                       context,
-                      "/activity",
-                      arguments: activity,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ActivityPage(activityModel: activity),
+                      ),
                     );
                   },
                 ),
