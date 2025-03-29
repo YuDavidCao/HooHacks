@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "65914398338",
+    "project_id": "hoohacks-a6878",
+    "storage_bucket": "hoohacks-a6878.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:65914398338:android:168bf8614f409bb3f1769b",
+        "android_client_info": {
+          "package_name": "com.example.hoohacks"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDF2DMN3ELFLILSVUj_CE7RYgfHTAaMVMg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
