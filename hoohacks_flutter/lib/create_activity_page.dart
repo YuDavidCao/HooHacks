@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hoohacks/constant.dart';
+import 'package:hoohacks/firebase/firebase_firestore.dart';
 
 class CreateActivityPage extends StatefulWidget {
   final LatLng location;
@@ -14,10 +15,35 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _contactEmailController = TextEditingController();
+  final TextEditingController _startDateTimeController =
+      TextEditingController();
+  final TextEditingController _endDateTimeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  List<String> _categories = [];
+  DateTime _startDate = DateTime.now();
+  DateTime _endDate = DateTime.now().add(const Duration(days: 1));
+
+  final List<String> _categories = [];
+
+  @override
+  void initState() {
+    _startDateTimeController.text =
+        "${_startDate.year}-${_startDate.month}-${_startDate.day} ${_startDate.hour}:${_startDate.minute}";
+    _endDateTimeController.text =
+        "${_endDate.year}-${_endDate.month}-${_endDate.day} ${_endDate.hour}:${_endDate.minute}";
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _contactEmailController.dispose();
+    _startDateTimeController.dispose();
+    _endDateTimeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +142,128 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
             ),
             Padding(
               padding: middleWidgetPadding,
+              child: TextFormField(
+                controller: _startDateTimeController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: "Start Date & Time",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: Wrap(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _startDate,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime(2101),
+                          );
+                          if (picked != null && picked != _startDate) {
+                            setState(() {
+                              _startDate = picked;
+                              _startDateTimeController.text =
+                                  "${_startDate.year}-${_startDate.month}-${_startDate.day} ${_startDate.hour}:${_startDate.minute}";
+                            });
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.access_time),
+                        onPressed: () async {
+                          final TimeOfDay? picked = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(_startDate),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _startDate = DateTime(
+                                _startDate.year,
+                                _startDate.month,
+                                _startDate.day,
+                                picked.hour,
+                                picked.minute,
+                              );
+                              _startDateTimeController.text =
+                                  "${_startDate.year}-${_startDate.month}-${_startDate.day} ${_startDate.hour}:${_startDate.minute}";
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a start date';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: middleWidgetPadding,
+              child: TextFormField(
+                controller: _endDateTimeController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: "End Date & Time",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: Wrap(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.calendar_today),
+                        onPressed: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: _endDate,
+                            firstDate: _startDate,
+                            lastDate: DateTime(2101),
+                          );
+                          if (picked != null && picked != _endDate) {
+                            setState(() {
+                              _endDate = picked;
+                              _endDateTimeController.text =
+                                  "${_endDate.year}-${_endDate.month}-${_endDate.day} ${_endDate.hour}:${_endDate.minute}";
+                            });
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.access_time),
+                        onPressed: () async {
+                          final TimeOfDay? picked = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(_endDate),
+                          );
+                          if (picked != null) {
+                            setState(() {
+                              _endDate = DateTime(
+                                _endDate.year,
+                                _endDate.month,
+                                _endDate.day,
+                                picked.hour,
+                                picked.minute,
+                              );
+                              _endDateTimeController.text =
+                                  "${_endDate.year}-${_endDate.month}-${_endDate.day} ${_endDate.hour}:${_endDate.minute}";
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select an end date';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Padding(
+              padding: middleWidgetPadding,
               child: Wrap(
                 children: [
                   for (final category in categories)
@@ -142,15 +290,29 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            // Handle form submission
-            // You can access the values using:
-            // _titleController.text
-            // _descriptionController.text
-            // _contactEmailController.text
-            // _categories
-            Navigator.pop(context);
+            bool successful = await addActivity(
+              _titleController.text,
+              _descriptionController.text,
+              _categories.isNotEmpty ? _categories.first : '',
+              widget.location.latitude,
+              widget.location.longitude,
+              _startDate,
+              _endDate,
+              _categories,
+              _contactEmailController.text,
+            );
+            if (successful) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Activity created successfully!')),
+              );
+              Navigator.pop(context);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Failed to create activity.')),
+              );
+            }
           }
         },
         backgroundColor: const Color.fromARGB(255, 229, 114, 0),

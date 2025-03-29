@@ -13,10 +13,9 @@ class ActivityModel {
   final List<String> participants;
   final int? limit;
   final String contactEmail;
-  final String upvotes;
-  final String downvotes;
+  final int upvotes;
+  final int downvotes;
   final bool organizationOnly;
-  final List<String> years;
 
   ActivityModel({
     this.id,
@@ -36,12 +35,10 @@ class ActivityModel {
     required this.upvotes,
     required this.downvotes,
     required this.organizationOnly,
-    required this.years,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'Id': id,
       'Publisher': publisher,
       'Title': title,
       'Description': description,
@@ -58,7 +55,6 @@ class ActivityModel {
       'Upvotes': upvotes,
       'Downvotes': downvotes,
       'OrganizationOnly': organizationOnly,
-      'Years': years,
     };
   }
 }
