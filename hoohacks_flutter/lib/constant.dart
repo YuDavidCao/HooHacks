@@ -34,3 +34,5 @@ const List<String> distanceFilters = [
   "5 miles",
   "10 miles",
 ];
+
+const Color ctaColor = Color.fromARGB(255, 255, 64, 0);
