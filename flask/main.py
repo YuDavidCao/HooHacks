@@ -14,6 +14,7 @@ cred = credentials.Certificate("key.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 collection = db.collection("message")
+users_collection = db.collection("users")
 activities_collection = db.collection("activities")
 
 @app.route('/get-messages', methods=['GET'])
@@ -24,26 +25,43 @@ def get_messages():
 
 @app.route('/get-activity', methods=['POST'])
 def get_activities():
-    data = request.json 
-    if not data:
-        return jsonify({"error": "Invalid request"}), 400
-    user_id = data.get("Uid")
-    user_latitude = float(data.get("Latitude"))
-    user_longitude = float(data.get("Longitude"))
+   data = request.json
+   if not data:
+       return jsonify({"error": "Invalid request"}), 400
+   user_id = data.get("Uid")
+   user_latitude = float(data.get("Latitude"))
+   user_longitude = float(data.get("Longitude"))
 
-    docs = activities_collection.get()  # Fetch all documents from the "activity" collection
-    activities = []  # Convert each document to a dictionary
 
-    for doc in docs:
-        activity = doc.to_dict()
-        activity["weight"] = 5 # Calculate weight based on user location
-        activities.append(activity)
+   docs = activities_collection.get()  # Fetch all documents from the "activity" collection
+   activities = []  # Convert each document to a dictionary
 
-    return {"activities": activities}  # Return the list of activities as a JSON response
+
+   for doc in docs:
+       activity = doc.to_dict()
+       activity["weight"] = 5 # Calculate weight based on user location
+       activities.append(activity)
+
+
+   return {"activities": activities}  # Return the list of activities as a JSON response
+
 
 def get_weight(user_latitude, user_longitude, ):
-    return user_latitude - user_longitude 
+   return user_latitude - user_longitude
 
+
+@app.route('/get-users', methods=['GET'])
+def get_users():
+    #docs = users_collection.document(uid).get()
+    #return docs.to_dict()
+    #doc = users_collection.document(uid).get()
+    #if doc.exists:
+    #    return jsonify(doc.to_dict()), 200
+    #else:
+    #    return jsonify({'error': 'User not found'}), 404
+    docs = users_collection.stream()
+    users = [doc.to_dict() for doc in docs]
+    return jsonify({"users": users}), 200
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
