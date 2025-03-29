@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/constant.dart';
+import 'package:hoohacks/firebase/firebase_firestore.dart';
+import 'package:hoohacks/models/user_model.dart';
 
 class EditProfileInfoPage extends StatefulWidget {
   const EditProfileInfoPage({super.key});
@@ -21,6 +24,7 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
         FirebaseAuth.instance.currentUser?.displayName ?? "";
     _emailEditingController.text =
         FirebaseAuth.instance.currentUser?.email ?? "";
+    getUserProfile();
     super.initState();
   }
 
@@ -30,6 +34,13 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
     _bioEditingController.dispose();
     _emailEditingController.dispose();
     super.dispose();
+  }
+
+  Future<void> getUserProfile() async {
+    final UserModel userModel = await getUser(
+      FirebaseAuth.instance.currentUser!.uid,
+    );
+    _bioEditingController.text = userModel.bio;
   }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -107,6 +118,12 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
                     );
                     FirebaseAuth.instance.currentUser?.updateEmail(
                       _emailEditingController.text,
+                    );
+                    updateUser(
+                      _usernameEditingController.text,
+                      _emailEditingController.text,
+                      _bioEditingController.text,
+                      context,
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

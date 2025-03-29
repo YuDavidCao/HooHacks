@@ -234,10 +234,8 @@ Future<bool> createUser(
 
 Future<UserModel> getUser(String userId) async {
   try {
-    final snapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userId)
-        .get();
+    final snapshot =
+        await FirebaseFirestore.instance.collection("users").doc(userId).get();
     return UserModel.fromMap(snapshot.data()!, snapshot.id);
   } catch (e) {
     print("Error getting user: $e");
@@ -253,4 +251,27 @@ Future<UserModel> getUser(String userId) async {
     upvotedActivities: [],
     downvotedActivities: [],
   );
+}
+
+Future<bool> updateUser(
+  String username,
+  String email,
+  String bio,
+  BuildContext context,
+) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .update({'name': username, 'email': email, 'bio': bio});
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("User updated!")));
+    return true;
+  } catch (e) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Error updating user!")));
+  }
+  return false;
 }

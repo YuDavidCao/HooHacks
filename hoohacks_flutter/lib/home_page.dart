@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
       floatingActionButton: FloatingActionButton(onPressed: () {
-        print(Provider.of<UserState>(context,listen:false).userModel);
+        //testing ->  reserved for testing purposes
       }),
     );
   }
