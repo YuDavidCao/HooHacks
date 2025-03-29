@@ -1,12 +1,3 @@
-// Name: String
-// Email: String
-// Username: String
-// Bio: String
-// Year: String
-// Organization: <String[OrgId]>[]
-// Participating: <String[ActId]>[]
-// Interest: <String>[]
-
 class UserModel {
   final String? id;
   final String name;

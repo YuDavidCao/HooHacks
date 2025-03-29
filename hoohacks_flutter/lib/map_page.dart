@@ -3,6 +3,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:async';
 
+import 'package:hoohacks/create_activity_page.dart';
+import 'package:hoohacks/filter_sheet.dart';
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
@@ -14,6 +17,8 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
+  final TextEditingController _searchController = TextEditingController();
+
   late AnimationController _animationController;
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(38.033554, -78.507980),
@@ -22,6 +27,19 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   Set<Marker> _markers = {};
   Set<Circle> _circles = {};
+
+  List<String> _categories = [];
+  String distanceFilter = "none";
+
+  void onFilterChanged() {
+    // ReQuery the database with the new filter.
+  }
+
+  void setDistanceFilter(String value) {
+    setState(() {
+      distanceFilter = value;
+    });
+  }
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -129,6 +147,29 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
     });
   }
 
+  void showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.8,
+          minChildSize: 0.2,
+          maxChildSize: 0.8,
+          builder: ((context, scrollController) {
+            return FilterSheet(
+              scrollController: scrollController,
+              categories: _categories,
+              setDistanceFilter: setDistanceFilter,
+            );
+          }),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -137,6 +178,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
     _controller.future.then((controller) {
       controller.dispose();
     });
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -154,6 +196,14 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               _controller.complete(controller);
             },
             myLocationButtonEnabled: false,
+            onLongPress: (LatLng position) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateActivityPage(location: position),
+                ),
+              );
+            },
           ),
           Container(
             width: double.infinity,
@@ -178,8 +228,9 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     // Implement search functionality here.
                   },
                 ),
-                const Expanded(
+                Expanded(
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search',
                       border: InputBorder.none,
@@ -189,7 +240,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 IconButton(
                   icon: const Icon(Icons.filter_list),
                   onPressed: () {
-                    // Implement filter functionality here.
+                    showFilterBottomSheet();
                   },
                 ),
               ],
