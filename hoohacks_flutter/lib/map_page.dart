@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:hoohacks/create_activity_page.dart';
 import 'package:hoohacks/filter_sheet.dart';
+import 'package:hoohacks/global_bottom_navigation_bar.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -265,6 +266,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
         },
         child: const Icon(Icons.my_location),
       ),
+      bottomNavigationBar: GlobalBottomNavigationBar(pageName: "MapPage"),
     );
   }
 }
