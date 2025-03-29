@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/authentication_page.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/edit_profile_info_page.dart';
 import 'package:hoohacks/firebase/firebase_auth.dart';
+import 'package:hoohacks/firebase/firebase_storage.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -16,6 +20,20 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   TextEditingController bioEditingController = TextEditingController();
 
+  File? profilePicture;
+
+  void pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      profilePicture = File(image.path);
+      FirebaseAuth.instance.currentUser!.updatePhotoURL(
+        await uploadProfilePicture(profilePicture!, context),
+      );
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,9 +42,32 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             const SizedBox(height: 80),
-            const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/images/profile.png'),
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 75,
+                  backgroundImage:
+                      profilePicture != null
+                          ? FileImage(profilePicture!)
+                          : FirebaseAuth.instance.currentUser!.photoURL == null
+                          ? AssetImage('assets/images/profile.png')
+                          : NetworkImage(
+                            FirebaseAuth.instance.currentUser!.photoURL!,
+                          ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: FloatingActionButton.small(
+                    onPressed: () {
+                      pickImage();
+                    },
+                    shape: CircleBorder(),
+                    backgroundColor: ctaColor,
+                    child: const Icon(Icons.camera_alt),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             Text(

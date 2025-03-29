@@ -73,6 +73,7 @@ flutter:
     - assets/markers/m3.png
     - assets/markers/m4.png
     - assets/markers/m5.png
+    - assets/images/profile.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

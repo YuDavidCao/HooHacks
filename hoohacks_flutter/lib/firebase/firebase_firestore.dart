@@ -74,7 +74,12 @@ Future<bool> updateActivityImageUrl(String activityId, String imageUrl) async {
 Future<List<ActivityModel>> getActivities() async {
   try {
     final firestore = FirebaseFirestore.instance;
-    final snapshot = await firestore.collection('activities').get();
+    final snapshot =
+        await firestore
+            .collection('activities')
+            .orderBy('StartDate', descending: true)
+            .where('EndDate', isGreaterThan: DateTime.now())
+            .get();
     return snapshot.docs
         .map((doc) => ActivityModel.fromMap(doc.data(), doc.id))
         .toList();

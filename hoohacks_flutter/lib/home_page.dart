@@ -1,8 +1,13 @@
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/activity_page.dart';
+import 'package:hoohacks/constant.dart';
+import 'package:hoohacks/firebase/firebase_firestore.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
+import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/activity_state.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -14,55 +19,151 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Home")),
-      body: Consumer<ActivityState>(
-        builder: (context, ActivityState activityState, child) {
-          return ListView(
-            children: [
-              for (var activity in activityState.activities) ...[
-                ListTile(
-                  title: Text(activity.title),
-                  subtitle: Text(activity.description),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => ActivityPage(activityModel: activity),
-                      ),
-                    );
-                  },
-                ),
-                Divider(),
-              ],
+      body: Column(
+        children: [
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              const Tab(icon: Icon(Icons.calendar_month), text: 'Upcoming'),
+              const Tab(icon: Icon(Icons.celebration), text: 'All Activities'),
+              const Tab(icon: Icon(Icons.create), text: 'Created'),
             ],
-          );
-        },
+          ),
+          Flexible(
+            child: Consumer<ActivityState>(
+              builder: (context, ActivityState activityState, child) {
+                List<ActivityModel> activities = activityState.activities;
+
+                if (_tabController.index == 0) {
+                  activities =
+                      activities
+                          .where(
+                            (activity) =>
+                                activity.endDate.isAfter(DateTime.now()) &&
+                                activity.participants.contains(
+                                  FirebaseAuth.instance.currentUser!.uid,
+                                ),
+                          )
+                          .toList();
+                } else if (_tabController.index == 2) {
+                  activities =
+                      activities
+                          .where(
+                            (activity) =>
+                                activity.publisher ==
+                                FirebaseAuth.instance.currentUser!.uid,
+                          )
+                          .toList();
+                }
+
+                print(activities);
+
+                return ListView(
+                  children: [
+                    for (var activity in activities) ...[
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      ActivityPage(activityModel: activity),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          margin: middleWidgetPadding,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.grey,
+                                blurRadius: 5.0,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                activity.title,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(activity.description),
+                              Wrap(
+                                children: [
+                                  for (var categories
+                                      in activity.categories) ...[
+                                    Chip(label: Text(categories)),
+                                    SizedBox(width: 5),
+                                  ],
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     http
-      //         .post(
-      //           Uri.parse(
-      //             "https://f826-199-111-224-44.ngrok-free.app/get-activity",
-      //           ),
-      //           body: jsonEncode({
-      //             "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
-      //             "Longitude": "38.033554",
-      //             "Latitude": "-78.507980",
-      //           }),
-      //           headers: {"Content-Type": "application/json"},
-      //         )
-      //         .then((response) {
-      //           print(response.body);
-      //         });
-      //   },
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          List<ActivityModel> activities = await getActivities();
+          log(activities.toString());
+          // http
+          //     .post(
+          //       Uri.parse(
+          //         "https://8d24-199-111-224-97.ngrok-free.app/get-activity",
+          //       ),
+          //       body: jsonEncode({
+          //         "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
+          //         "Longitude": "38.033554",
+          //         "Latitude": "-78.507980",
+          //       }),
+          //       headers: {"Content-Type": "application/json"},
+          //     )
+          //     .then((response) {
+          //       log(response.body);
+          //     });
+        },
+      ),
     );
   }
 }
