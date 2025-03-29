@@ -2,3 +2,5 @@ venv
 key.json 
 __pycache__
 env
+main.cpython-39.pyc
+main.cpython-313.pyc
