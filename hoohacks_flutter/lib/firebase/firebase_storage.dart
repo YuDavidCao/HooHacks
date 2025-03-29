@@ -11,11 +11,12 @@ Future<String?> uploadActivityImage(
   try {
     final storageRef = FirebaseStorage.instance.ref();
     final activitySnapshot = await storageRef
-        .child("activities/$docId")
+        .child("activities/$docId,png")
         .putFile(file);
     String downloadUrl = await activitySnapshot.ref.getDownloadURL();
     return downloadUrl;
   } catch (e) {
+    print(e);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Failed to upload activity picture")),
     );

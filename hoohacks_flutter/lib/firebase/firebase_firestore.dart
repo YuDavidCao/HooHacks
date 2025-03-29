@@ -26,9 +26,11 @@ Future<bool> addActivity(
 
     DocumentReference d = firestore.collection('activities').doc();
     String? downloadUrl;
-    if (image == null) {
-      downloadUrl = await uploadActivityImage(image!, d.id, context);
+    if (image != null) {
+      downloadUrl = await uploadActivityImage(image, d.id, context);
     }
+
+    print("Download URL: $downloadUrl");
 
     ActivityModel activityModel = ActivityModel(
       publisher: FirebaseAuth.instance.currentUser?.uid ?? '',
