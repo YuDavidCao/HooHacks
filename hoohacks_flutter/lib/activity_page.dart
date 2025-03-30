@@ -324,7 +324,7 @@ class _ActivityPageState extends State<ActivityPage> {
               ],
             ),
           ),
-          if (widget.activityModel.organization != null)
+          if (widget.activityModel.organization != null && widget.activityModel.organization!.isNotEmpty)
             Padding(
               padding: middleWidgetPadding,
               child: FutureBuilder<OrganizationModel?>(

@@ -162,7 +162,7 @@ def write_json(link_elements, location_elements, image_sources, output_file='eve
             "Date": start_date.isoformat(),
         }
         try:
-            response = requests.post('http://127.0.0.1:8000/store-activity', json=create_simple_event_json(title, description, end_date, id))
+            response = requests.post('http://127.0.0.1:4000/store-activity', json=create_simple_event_json(title, description, end_date, id))
             response.raise_for_status()
             print(f"Data sent successfully for event {title}. Response: {response.json()}")
         except requests.exceptions.RequestException as e:

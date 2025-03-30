@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,6 +18,7 @@ import 'package:hoohacks/states/activity_state.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class MapPage extends StatefulWidget {
   final ActivityModel? activityModel;
@@ -288,6 +291,157 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
     activityState.addListener(() {
       onActivityChanged();
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      createTutorial();
+      SharedPreferences.getInstance().then((sharedPref) {
+        if (!sharedPref.containsKey("MapPageFirstTimeInitialization")) {
+          sharedPref.setBool("MapPageFirstTimeInitialization", false);
+          Future.delayed(const Duration(seconds: 1), showTutorial);
+        }
+      });
+    });
+  }
+
+  late TutorialCoachMark tutorialCoachMark;
+
+  final GlobalKey groundKey = GlobalKey();
+  final GlobalKey updateLocationKey = GlobalKey();
+  final GlobalKey myLocationKey = GlobalKey();
+  final GlobalKey searchKey = GlobalKey();
+  final GlobalKey filterKey = GlobalKey();
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: [
+        TargetFocus(
+          identify: "Ground",
+          keyTarget: groundKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Tap here to quickly return to the ground location and view the main campus area.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          shape: ShapeLightFocus.RRect,
+          identify: "updateLocation",
+          keyTarget: updateLocationKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Press here to update your current location. The map will smoothly center on your latest recorded position.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "AddTodoButton",
+          keyTarget: myLocationKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Tap here to quickly retrieve your current location and navigate the map accordingly.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          shape: ShapeLightFocus.RRect,
+          identify: "Search",
+          keyTarget: searchKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Enter keywords here to search for activities in your vicinity and discover events that match your interests.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "Filter",
+          keyTarget: filterKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Open the filter options to refine activities by categories, distance, and bookmarked selections, making it easier to find exactly what you're looking for.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+      colorShadow: Theme.of(context).colorScheme.primary,
+      textSkip: "SKIP",
+      textStyleSkip: Theme.of(context).textTheme.titleLarge!,
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    );
+  }
+
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
   }
 
   void _updateCircles() {
@@ -405,6 +559,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   },
                 ),
                 Expanded(
+                  key: searchKey,
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
@@ -415,6 +570,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   ),
                 ),
                 IconButton(
+                  key: filterKey,
                   icon: const Icon(Icons.filter_list),
                   onPressed: () {
                     showFilterBottomSheet();
@@ -432,6 +588,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               children: [
                 FloatingActionButton.extended(
                   heroTag: null,
+                  key: updateLocationKey,
                   onPressed: () {
                     setState(() {
                       yourLocation = LatLng(
@@ -454,6 +611,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 FloatingActionButton(
+                  key: groundKey,
                   heroTag: null,
                   onPressed: () {
                     _controller.future.then((controller) {
@@ -474,6 +632,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        key: myLocationKey,
         onPressed: () {
           _determinePosition().then((position) {
             _controller.future.then((controller) {

@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,8 @@ import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/activity_state.dart';
 import 'package:hoohacks/states/user_state.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +32,131 @@ class _HomePageState extends State<HomePage>
       setState(() {});
     });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      createTutorial();
+      SharedPreferences.getInstance().then((sharedPref) {
+        if (!sharedPref.containsKey("HomePagePageFirstTimeInitialization")) {
+          sharedPref.setBool("HomePagePageFirstTimeInitialization", false);
+          Future.delayed(const Duration(seconds: 1), showTutorial);
+        }
+      });
+    });
+  }
+
+  late TutorialCoachMark tutorialCoachMark;
+
+  final GlobalKey upComingKey = GlobalKey();
+  final GlobalKey allActivityKey = GlobalKey();
+  final GlobalKey byMeKey = GlobalKey();
+  final GlobalKey savedKey = GlobalKey();
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: [
+        TargetFocus(
+          identify: "Upcoming",
+          keyTarget: upComingKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Upcoming activities: Check out the events you're scheduled to attend soon. Tap on an activity to learn more about its time, venue, and additional details.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "All Activity",
+          keyTarget: allActivityKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "All activities: Browse through the complete list of available events. Discover various opportunities and choose the ones that match your interests.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "By Me",
+          keyTarget: byMeKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "By Me: View and manage the activities you have created. This section helps you keep track of your own events and any updates you make to them.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "Saved",
+          keyTarget: savedKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Saved activities: Easily access the events you have bookmarked. This tab stores your saved activities for quick reference whenever needed.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+      colorShadow: Theme.of(context).colorScheme.primary,
+      textSkip: "SKIP",
+      textStyleSkip: Theme.of(context).textTheme.titleLarge!,
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    );
+  }
+
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
   }
 
   @override
@@ -49,10 +174,18 @@ class _HomePageState extends State<HomePage>
           TabBar(
             controller: _tabController,
             tabs: [
-              const Tab(icon: Icon(Icons.calendar_month), text: 'Upcoming'),
-              const Tab(icon: Icon(Icons.celebration), text: 'All Activities'),
-              const Tab(icon: Icon(Icons.person), text: 'By Me'),
-              const Tab(icon: Icon(Icons.bookmark), text: 'Saved'),
+              Tab(
+                key: upComingKey,
+                icon: Icon(Icons.calendar_month),
+                text: 'Upcoming',
+              ),
+              Tab(
+                key: allActivityKey,
+                icon: Icon(Icons.celebration),
+                text: 'All Activities',
+              ),
+              Tab(key: byMeKey, icon: Icon(Icons.person), text: 'By Me'),
+              Tab(key: savedKey, icon: Icon(Icons.bookmark), text: 'Saved'),
             ],
           ),
           Flexible(

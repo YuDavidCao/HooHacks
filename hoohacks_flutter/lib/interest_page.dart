@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -7,6 +9,8 @@ import 'package:hoohacks/firebase/flask_endpint.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/map_page.dart';
 import 'package:hoohacks/models/activity_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class InterestPage extends StatefulWidget {
   const InterestPage({super.key});
@@ -80,6 +84,100 @@ class _InterestPageState extends State<InterestPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      createTutorial();
+      SharedPreferences.getInstance().then((sharedPref) {
+        if (!sharedPref.containsKey("InterestPagePageFirstTimeInitialization")) {
+          sharedPref.setBool("InterestPagePageFirstTimeInitialization", false);
+          Future.delayed(const Duration(seconds: 1), showTutorial);
+        }
+      });
+    });
+  }
+
+  late TutorialCoachMark tutorialCoachMark;
+
+  final GlobalKey bodyKey = GlobalKey();
+  final GlobalKey messageFieldKey = GlobalKey();
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: [
+        TargetFocus(
+          shape: ShapeLightFocus.RRect,
+          identify: "Body",
+          keyTarget: bodyKey,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.bottom,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Welcome to the Interest Page",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "This page is where you can find activities based on your interest. You can type in the activity you are looking for and we will provide you with a list of activities that match your interest.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        TargetFocus(
+          identify: "Chat",
+          keyTarget: messageFieldKey,
+          shape: ShapeLightFocus.RRect,
+          alignSkip: Alignment.topRight,
+          enableOverlayTab: true,
+          contents: [
+            TargetContent(
+              align: ContentAlign.top,
+              builder: (context, controller) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Chat Box",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "This is where you can type in what kind of activities you are looking for. Once you type in the activity, we will provide you with a list of activities that match your interest.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+      colorShadow: Theme.of(context).colorScheme.primary,
+      textSkip: "SKIP",
+      textStyleSkip: Theme.of(context).textTheme.titleLarge!,
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+    );
+  }
+
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -97,6 +195,7 @@ class _InterestPageState extends State<InterestPage> {
                   children: [
                     Text(
                       "Welcome ${FirebaseAuth.instance.currentUser!.displayName}",
+                      key: bodyKey,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -259,6 +358,7 @@ class _InterestPageState extends State<InterestPage> {
               color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.all(10.0),
               child: TextField(
+                key: messageFieldKey,
                 onSubmitted: (String text) {
                   onChatSend();
                   interestTextController.clear();
