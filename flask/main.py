@@ -252,15 +252,16 @@ def get_relevant_activities():
     if not data:
         return jsonify({"error": "Invalid request"}), 400
     endDate = int(data.get("EndDate"))
-    interests = data.get("Interests", [])
+    interests = data.get("Interests")
     result_embeddings = gemini_client.models.embed_content(
         model="gemini-embedding-exp-03-07",
         contents=interests
     ).embeddings
+
     collection = get_or_create_collection(COLLECTION_NAME)
     results = collection.query(
         query_embeddings=[result_embeddings[0].values],
-        n_results=1,
+        n_results=5,
         where={
             "endDate": {
                 "$gt": endDate
