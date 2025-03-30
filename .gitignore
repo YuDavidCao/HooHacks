@@ -4,3 +4,4 @@ __pycache__
 env
 main.cpython-39.pyc
 main.cpython-313.pyc
+.env 
