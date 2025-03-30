@@ -188,6 +188,18 @@ class _ActivityPageState extends State<ActivityPage> {
                 child: const Text("Join Activity"),
               ),
             ),
+          if (widget.activityModel.publisher ==
+              FirebaseAuth.instance.currentUser!.uid)
+            Padding(
+              padding: middleWidgetPadding,
+              child: ElevatedButton(
+                onPressed: () {
+                  deleteActivity(widget.activityModel.id!);
+                  Navigator.pop(context);
+                },
+                child: const Text("Delete Activity"),
+              ),
+            ),
         ],
       ),
     );

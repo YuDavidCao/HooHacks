@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hoohacks/activity_page.dart';
+import 'package:hoohacks/constant.dart';
 import 'dart:async';
 
 import 'package:hoohacks/create_activity_page.dart';
 import 'package:hoohacks/filter_sheet.dart';
+import 'package:hoohacks/firebase/firebase_firestore.dart';
+import 'package:hoohacks/firebase/flask_endpint.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
+import 'package:hoohacks/models/activity_model.dart';
+import 'package:hoohacks/states/activity_state.dart';
+
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -27,18 +36,80 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   );
 
   Set<Marker> _markers = {};
-  Set<Circle> _circles = {};
+  Map<Circle, CircleConfig> _circles = {};
 
   List<String> _categories = [];
   String distanceFilter = "none";
 
-  void onFilterChanged() {
-    // ReQuery the database with the new filter.
+  LatLng _currentCameraPosition = const LatLng(38.033554, -78.507980);
+
+  List<ActivityModel> _activities = [];
+
+  void onFilterChanged() async {
+    _activities = await getFilteredActivities(
+      _currentCameraPosition.longitude, // longitude,
+      _currentCameraPosition.latitude, // latitude,
+      _categories, // categories,
+      distanceFilter, // distance,
+      _searchController.text, // searchString,
+    );
+    BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(20, 20)),
+      'assets/markers/m1.png',
+    ).then((icon) {
+      setState(() {
+        _markers =
+            _activities.map((activity) {
+              return Marker(
+                markerId: MarkerId(activity.id!),
+                position: LatLng(activity.latitude, activity.longitude),
+                infoWindow: InfoWindow(title: activity.title),
+                anchor: Offset(0.5, 0.5),
+                icon: icon,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => ActivityPage(activityModel: activity),
+                    ),
+                  );
+                },
+              );
+            }).toSet();
+        for (ActivityModel activity in _activities) {
+          _circles[Circle(
+            circleId: CircleId(activity.id!),
+            center: LatLng(activity.latitude, activity.longitude),
+            radius: 0,
+            fillColor: Colors.yellow.withOpacity(0.5),
+            strokeColor: Colors.transparent,
+            strokeWidth: 0,
+          )] = CircleConfig(
+            radius: 10,
+            fillColor: Colors.yellow.withOpacity(0.5),
+          );
+        }
+        if (!init) {
+          _animationController =
+              AnimationController(
+                  vsync: this,
+                  duration: const Duration(seconds: 2),
+                )
+                ..addListener(_updateCircles)
+                ..repeat();
+        }
+        init = true;
+      });
+    });
   }
+
+  bool init = false;
 
   void setDistanceFilter(String value) {
     setState(() {
       distanceFilter = value;
+      onFilterChanged();
     });
   }
 
@@ -69,84 +140,61 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return await Geolocator.getCurrentPosition();
   }
 
+  late Function onActivityChanged;
+
   @override
   void initState() {
     super.initState();
-
-    // Load the custom marker icon.
-    BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(20, 20)),
-      'assets/markers/m1.png',
-    ).then((icon) {
-      setState(() {
-        _markers = {
-          Marker(
-            markerId: MarkerId('UVA'),
-            position: const LatLng(38.033554, -78.507980),
-            infoWindow: const InfoWindow(title: 'Google Plex'),
-            icon: icon,
-            onTap: () => print('UAV'),
-            anchor: Offset(0.5, 0.5),
-          ),
-          Marker(
-            markerId: MarkerId('UVA2'),
-            position: const LatLng(38.133554, -78.517980),
-            infoWindow: const InfoWindow(title: 'UVA2'),
-            icon: icon,
-            onTap: () => print('UVA2'),
-            anchor: Offset(0.5, 0.5),
-          ),
-        };
-
-        // Create initial circles with zero radius.
-        _circles = {
-          Circle(
-            circleId: CircleId('ripple_UVA'),
-            center: const LatLng(38.033554, -78.507980),
-            radius: 0,
-            fillColor: Colors.yellow.withOpacity(0.5),
-            strokeColor: Colors.yellow,
-            strokeWidth: 1,
-          ),
-          Circle(
-            circleId: CircleId('ripple_UVA2'),
-            center: const LatLng(38.133554, -78.517980),
-            radius: 0,
-            fillColor: Colors.yellow.withOpacity(0.5),
-            strokeColor: Colors.yellow,
-            strokeWidth: 1,
-          ),
-        };
-
-        // Start the ripple animation.
-        _animationController =
-            AnimationController(
-                vsync: this,
-                duration: const Duration(seconds: 2),
-              )
-              ..addListener(_updateCircles)
-              ..repeat();
-      });
+    onFilterChanged();
+    onActivityChanged = () {
+      onFilterChanged();
+    };
+    Provider.of<ActivityState>(context, listen: false).addListener(() {
+      onActivityChanged();
     });
   }
 
   void _updateCircles() {
-    // Maximum radius (in meters) for the ripple.
-    const double maxRadius = 100;
-    final double currentRadius = _animationController.value * maxRadius;
-    // Fade out circle as it expands.
-    final double currentOpacity = (1 - _animationController.value) * 0.5;
-
     setState(() {
-      _circles =
-          _circles.map((circle) {
-            return circle.copyWith(
-              radiusParam: currentRadius,
-              fillColorParam: Colors.yellow.withOpacity(currentOpacity),
-            );
-          }).toSet();
+      Map<Circle, CircleConfig> newCircles = {};
+      for (Circle circle in _circles.keys) {
+        final double maxRadius = _circles[circle]!.radius.toDouble();
+        final double currentRadius = _animationController.value * maxRadius;
+        final double currentOpacity = (1 - _animationController.value) * 0.5;
+        Circle newCircle = circle.copyWith(
+          radiusParam: currentRadius,
+          fillColorParam: _circles[circle]!.fillColor.withOpacity(
+            currentOpacity,
+          ),
+        );
+        newCircles[newCircle] = _circles[circle]!;
+      }
+      _circles = newCircles;
+      // for (Circle circle in _circles.keys) {
+      //   _circles[circle] = _circles[circle]!.copyWith(
+      //     radius: currentRadius.toInt(),
+      //     fillColor: _circles[circle]!.fillColor.withOpacity(currentOpacity),
+      //   );
+      // }
+      // _circles =
+      //     _circles.entries.map((MapEntry<Circle, CircleConfig> entry) {
+      //       return entry.key.copyWith(
+      //         radiusParam: entry.value.radius,
+      //         fillColorParam: entry.value.fillColor.withOpacity(currentOpacity),
+      //       );
+      //     }).toSet();
     });
   }
+
+  //   setState(() {
+  //   _circles =
+  //       _circles.map((circle) {
+  //         return circle.copyWith(
+  //           radiusParam: currentRadius,
+  //           fillColorParam: Colors.yellow.withOpacity(currentOpacity),
+  //         );
+  //       }).toSet();
+  // });
 
   void showFilterBottomSheet() {
     showModalBottomSheet(
@@ -163,7 +211,9 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
             return FilterSheet(
               scrollController: scrollController,
               categories: _categories,
+              distanceFilter: distanceFilter,
               setDistanceFilter: setDistanceFilter,
+              onFilterChanged: onFilterChanged,
             );
           }),
         );
@@ -180,6 +230,10 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       controller.dispose();
     });
     _searchController.dispose();
+    Provider.of<ActivityState>(context, listen: false).removeListener(() {
+      onActivityChanged();
+    });
+    // _listener.ca
     super.dispose();
   }
 
@@ -189,10 +243,12 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       body: Stack(
         children: [
           GoogleMap(
+            onCameraMove:
+                (position) => _currentCameraPosition = position.target,
             mapType: MapType.normal,
             initialCameraPosition: _kGooglePlex,
             markers: _markers,
-            circles: _circles,
+            circles: _circles.keys.toSet(),
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
             },
@@ -226,7 +282,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
-                    // Implement search functionality here.
+                    onFilterChanged();
                   },
                 ),
                 Expanded(
@@ -236,6 +292,9 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                       hintText: 'Search',
                       border: InputBorder.none,
                     ),
+                    onSubmitted: (value) => {
+                      onFilterChanged(),
+                    },
                   ),
                 ),
                 IconButton(
@@ -269,4 +328,10 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "MapPage"),
     );
   }
+}
+
+class CircleConfig {
+  final int radius;
+  final Color fillColor;
+  CircleConfig({required this.radius, required this.fillColor});
 }

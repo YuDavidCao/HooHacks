@@ -36,3 +36,5 @@ const List<String> distanceFilters = [
 ];
 
 const Color ctaColor = Colors.orange;
+
+const String baseUrl = "http://127.0.0.1:5000";

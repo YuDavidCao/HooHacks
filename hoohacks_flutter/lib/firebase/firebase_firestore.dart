@@ -282,3 +282,14 @@ Future<bool> updateUser(
   }
   return false;
 }
+
+void deleteActivity(String activityId) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("activities")
+        .doc(activityId)
+        .delete();
+  } catch (e) {
+    print("Error deleting activity: $e");
+  }
+}

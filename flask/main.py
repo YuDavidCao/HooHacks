@@ -36,7 +36,7 @@ def get_activities():
     user_latitude = float(data.get("Latitude", 38.0356)) # default to Rotunda coordinates 
     user_longitude = float(data.get("Longitude", 78.5034))
     user_categories = data.get("Categories", []) 
-    user_distance = convert_to_kilometers(float(data.get("Distance", 7.0)))
+    user_distance = convert_to_kilometers(float(data.get("Distances", 7.0)))
     user_search = data.get("SearchString", "")
     user_interests = data.get("Interests", "")
 
@@ -53,10 +53,14 @@ def get_activities():
         if not end_date_str:
             continue  # Skip if EndDate is missing
 
-        try:
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc)
-        except ValueError:
-            continue  # Skip if EndDate format is incorrect
+        # If EndDate is already a datetime instance (e.g., DatetimeWithNanoseconds), convert to UTC.
+        if isinstance(end_date_str, datetime):
+            end_date = end_date_str.astimezone(timezone.utc)
+        else:
+            try:
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue  # Skip if EndDate format is incorrect
 
         # Filter out past activities
         if end_date < current_time:
@@ -67,6 +71,7 @@ def get_activities():
         longitude = activity.get("Longitude")
         distance = get_distance(user_latitude, user_longitude, latitude, longitude)
 
+        print(distance);
         if distance > user_distance:
             continue
 
@@ -77,7 +82,9 @@ def get_activities():
                 continue
         
         # Filter by search string
-        # TODO 
+        if user_search:
+            if user_search.lower() not in activity.get("Title", "").lower() and user_search.lower() not in activity.get("Description", "").lower():
+                continue
 
         participants = len(activity.get("Participants", []))
         downvotes = activity.get("Downvotes", 0)
