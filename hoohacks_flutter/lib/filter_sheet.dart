@@ -5,15 +5,19 @@ class FilterSheet extends StatefulWidget {
   final List<String> categories;
   final ScrollController scrollController;
   final String distanceFilter;
+  final bool bookMarked;
   final Function setDistanceFilter;
   final Function onFilterChanged;
+  final Function setBookMarked;
   const FilterSheet({
     super.key,
     required this.scrollController,
     required this.categories,
+    required this.bookMarked,
     required this.distanceFilter,
     required this.setDistanceFilter,
     required this.onFilterChanged,
+    required this.setBookMarked,
   });
 
   @override
@@ -22,10 +26,12 @@ class FilterSheet extends StatefulWidget {
 
 class _FilterSheetState extends State<FilterSheet> {
   String distanceFilter = "none";
+  late bool bookMarked = false;
 
   @override
   void initState() {
     distanceFilter = widget.distanceFilter;
+    bookMarked = widget.bookMarked;
     super.initState();
   }
 
@@ -124,6 +130,36 @@ class _FilterSheetState extends State<FilterSheet> {
                   ),
               ],
             ),
+          ),
+          Divider(
+            color: Colors.grey.withOpacity(0.5),
+            thickness: 1,
+            indent: 20,
+            endIndent: 20,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                child: Text(
+                  'Bookmarked Only',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                child: Switch(
+                  value: bookMarked,
+                  onChanged: (value) {
+                    setState(() {
+                      bookMarked = value;
+                      widget.setBookMarked(value);
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),

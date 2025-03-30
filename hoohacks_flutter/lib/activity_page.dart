@@ -8,6 +8,7 @@ import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/user_state.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ActivityPage extends StatefulWidget {
   final ActivityModel activityModel;
@@ -92,18 +93,17 @@ class _ActivityPageState extends State<ActivityPage> {
                 bottom: 15,
                 right: 25,
                 child: FloatingActionButton.small(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) =>
-                                MapPage(activityModel: widget.activityModel),
-                      ),
-                    );
+                  onPressed: () async {
+                    final url =
+                        "https://www.google.com/maps/search/?api=1&query=${widget.activityModel.latitude},${widget.activityModel.longitude}";
+
+                    if (await canLaunchUrl(Uri.parse(url))) {
+                      await launchUrl(Uri.parse(url));
+                    } else {
+                      throw 'Could not launch $url';
+                    }
                   },
-                  child: Icon(Icons.map),
+                  child: Icon(Icons.ios_share),
                 ),
               ),
             ],
@@ -426,17 +426,38 @@ class _ActivityPageState extends State<ActivityPage> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            saved
-                ? unsaveActivity(widget.activityModel.id!)
-                : saveActivity(widget.activityModel.id!);
-            saved = !saved;
-          });
-        },
-        backgroundColor: saved ? ctaColor : Colors.grey[50],
-        child: saved ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
+      floatingActionButton: Wrap(
+        children: [
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: () {
+              setState(() {
+                saved
+                    ? unsaveActivity(widget.activityModel.id!)
+                    : saveActivity(widget.activityModel.id!);
+                saved = !saved;
+              });
+            },
+            backgroundColor: saved ? ctaColor : Colors.grey[50],
+            child: saved ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
+          ),
+          const SizedBox(width: 10),
+          FloatingActionButton(
+            heroTag: null,
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (context) => MapPage(activityModel: widget.activityModel),
+                ),
+              );
+            },
+            backgroundColor: ctaColor,
+            child: Icon(Icons.map),
+          ),
+        ],
       ),
     );
   }

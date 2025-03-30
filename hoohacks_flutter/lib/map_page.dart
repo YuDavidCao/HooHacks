@@ -49,12 +49,21 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   MapType mapType = MapType.normal;
 
+  bool bookMarked = false;
+
   late BitmapDescriptor yellowMarker;
   late BitmapDescriptor yellowOrangeMarker;
   late BitmapDescriptor orangeMarker;
   late BitmapDescriptor orangeRedMarker;
   late BitmapDescriptor redMarker;
   late BitmapDescriptor currentMarker;
+
+  void setBookMarked(bool value) {
+    setState(() {
+      bookMarked = value;
+      onFilterChanged();
+    });
+  }
 
   void onFilterChanged() async {
     _activities = await getFilteredActivities(
@@ -63,6 +72,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       _categories, // categories,
       distanceFilter, // distance,
       _searchController.text, // searchString,
+      bookMarked, // bookMarkedOnly
     );
 
     setState(() {
@@ -93,20 +103,9 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
           icon: currentMarker,
         ),
       );
+      Map<Circle, CircleConfig> newCircle = {};
       for (ActivityModel activity in _activities) {
-        print(
-          (40000000 *
-                  activity.weight! *
-                  (1 /
-                      zoomLevel /
-                      zoomLevel /
-                      zoomLevel /
-                      zoomLevel /
-                      zoomLevel /
-                      zoomLevel))
-              .round(),
-        );
-        _circles[Circle(
+        newCircle[Circle(
           circleId: CircleId(activity.id!),
           center: LatLng(activity.latitude, activity.longitude),
           radius: 0,
@@ -128,6 +127,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
           fillColor: weightToColor(activity.weight!).withOpacity(0.5),
         );
       }
+      _circles = newCircle;
       if (!init) {
         _animationController =
             AnimationController(
@@ -325,8 +325,10 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               scrollController: scrollController,
               categories: _categories,
               distanceFilter: distanceFilter,
+              bookMarked: bookMarked,
               setDistanceFilter: setDistanceFilter,
               onFilterChanged: onFilterChanged,
+              setBookMarked: setBookMarked,
             );
           }),
         );

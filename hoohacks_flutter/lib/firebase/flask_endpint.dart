@@ -12,6 +12,7 @@ Future<List<ActivityModel>> getFilteredActivities(
   List<String> categories,
   String distance,
   String searchString,
+  bool bookMarkedOnly
 ) async {
   final response = await http.post(
     Uri.parse("$baseUrl/get-activity"),
@@ -22,6 +23,7 @@ Future<List<ActivityModel>> getFilteredActivities(
       "Categories": categories,
       "Distances": disToMiles(distance),
       "SearchString": searchString,
+      "BookMarkedOnly": bookMarkedOnly,
     }),
     headers: {"Content-Type": "application/json"},
   );

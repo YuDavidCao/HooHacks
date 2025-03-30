@@ -59,11 +59,14 @@ def get_activities():
     user_categories = data.get("Categories", []) 
     user_distance = convert_to_kilometers(float(data.get("Distances", 7.0)))
     user_search = data.get("SearchString", "")
+    book_marked_only = data.get("BookMarkedOnly", False)
 
     docs = activities_collection.get()  # Fetch all documents from the "activity" collection
     activities = []  # Store filtered activities
 
     current_time = datetime.now(timezone.utc)  # Get current UTC time (timezone-aware)
+
+    user_model = users_collection.document(user_id).get().to_dict();
 
     for doc in docs:
         activity = doc.to_dict()
@@ -72,6 +75,11 @@ def get_activities():
         end_date_str = activity.get("EndDate")
         if not end_date_str:
             continue  # Skip if EndDate is missing
+
+        if book_marked_only and user_model:
+            print(user_model["SavedActivities"])
+            if doc.id not in user_model["SavedActivities"]:
+                continue
 
         # If EndDate is already a datetime instance (e.g., DatetimeWithNanoseconds), convert to UTC.
         if isinstance(end_date_str, datetime):
