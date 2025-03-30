@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
+import 'package:hoohacks/map_page.dart';
 import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/user_state.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ActivityPage extends StatefulWidget {
@@ -59,62 +61,273 @@ class _ActivityPageState extends State<ActivityPage> {
                 child: Image.network(widget.activityModel.imageUrl!),
               ),
             ),
-          Container(
-            padding: middleWidgetPadding,
-            width: double.infinity,
-            height: 200,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: activityLocation,
-                zoom: 16.5,
-              ),
-              markers: {
-                Marker(
-                  markerId: const MarkerId('location'),
-                  position: activityLocation,
+          Stack(
+            children: [
+              Container(
+                padding: middleWidgetPadding,
+                width: double.infinity,
+                height: 200,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: activityLocation,
+                    zoom: 16.5,
+                  ),
+                  markers: {
+                    Marker(
+                      markerId: const MarkerId('location'),
+                      position: activityLocation,
+                    ),
+                  },
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
                 ),
-              },
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
-              mapToolbarEnabled: false,
-            ),
-          ),
-          Padding(
-            padding: middleWidgetPadding,
-            child: Text(
-              widget.activityModel.description,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-          Padding(
-            padding: middleWidgetPadding,
-            child: ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(
-                "${widget.activityModel.startDate.year}-${widget.activityModel.startDate.month}-${widget.activityModel.startDate.day} "
-                "${widget.activityModel.startDate.hour}:${widget.activityModel.startDate.minute.toString().padLeft(2, '0')}",
               ),
-              subtitle: const Text("Start Date & Time"),
-            ),
-          ),
-          Padding(
-            padding: middleWidgetPadding,
-            child: ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(
-                "${widget.activityModel.endDate.year}-${widget.activityModel.endDate.month}-${widget.activityModel.endDate.day} "
-                "${widget.activityModel.endDate.hour}:${widget.activityModel.endDate.minute.toString().padLeft(2, '0')}",
+              Positioned(
+                bottom: 15,
+                right: 25,
+                child: FloatingActionButton.small(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => MapPage(
+                              activityModel: widget.activityModel,
+                            ),
+                      ),
+                    );
+                  },
+                  child: Icon(Icons.map),
+                ),
               ),
-              subtitle: const Text("End Date & Time"),
+            ],
+          ),
+          Padding(
+            padding: middleWidgetPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.activityModel.description,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "${widget.activityModel.participants.length} participants",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(width: 10),
+                    Icon(Icons.people, size: 20),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(Icons.thumb_up, size: 20, color: ctaColor),
+                    Text(
+                      "${widget.activityModel.upvotes} upvotes",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(width: 10),
+                    Icon(Icons.thumb_down_outlined, size: 20, color: ctaColor),
+                    Text(
+                      "${widget.activityModel.downvotes} downvotes",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (widget.activityModel.publisher ==
+              FirebaseAuth.instance.currentUser!.uid)
+            Padding(
+              padding: middleWidgetPadding,
+              child: Text("Participants", style: TextStyle(fontSize: 16)),
+            ),
+          if (widget.activityModel.publisher ==
+              FirebaseAuth.instance.currentUser!.uid)
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.activityModel.participants.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Padding(
+                    padding: middleWidgetPadding,
+                    child: FutureBuilder<Map<String, dynamic>>(
+                      future: getUserInfo(
+                        widget.activityModel.participants[index],
+                      ),
+                      builder: (
+                        BuildContext context,
+                        AsyncSnapshot<Map<String, dynamic>> snapshot,
+                      ) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Icon(Icons.person),
+                                Text(snapshot.data!['Username']),
+                              ],
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return const Center(
+                            child: CircularProgressIndicator(strokeWidth: 1),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          Padding(
+            padding: middleWidgetPadding,
+            child: Container(
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        widget.activityModel.startDate.isBefore(DateTime.now())
+                            ? Icons.event_busy
+                            : Icons.event_available,
+                        color:
+                            widget.activityModel.startDate.isBefore(
+                                  DateTime.now(),
+                                )
+                                ? Colors.grey
+                                : Colors.black,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          DateFormat.yMMMd().add_jm().format(
+                            widget.activityModel.startDate,
+                          ),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color:
+                                widget.activityModel.startDate.isBefore(
+                                      DateTime.now(),
+                                    )
+                                    ? Colors.grey
+                                    : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Start Date & Time",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          widget.activityModel.startDate.isBefore(
+                                DateTime.now(),
+                              )
+                              ? Colors.grey
+                              : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Padding(
             padding: middleWidgetPadding,
-            child: ListTile(
-              leading: const Icon(Icons.email),
-              title: Text(widget.activityModel.contactEmail),
+            child: Container(
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        widget.activityModel.endDate.isBefore(DateTime.now())
+                            ? Icons.event_busy
+                            : Icons.event_available,
+                        color:
+                            widget.activityModel.endDate.isBefore(
+                                  DateTime.now(),
+                                )
+                                ? Colors.grey
+                                : Colors.black,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          DateFormat.yMMMd().add_jm().format(
+                            widget.activityModel.endDate,
+                          ),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color:
+                                widget.activityModel.endDate.isBefore(
+                                      DateTime.now(),
+                                    )
+                                    ? Colors.grey
+                                    : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "End Date & Time",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          widget.activityModel.endDate.isBefore(DateTime.now())
+                              ? Colors.grey
+                              : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+          Padding(
+            padding: middleWidgetPadding,
+            child: Row(
+              children: [
+                Icon(Icons.email),
+                const SizedBox(width: 10),
+                Text(widget.activityModel.contactEmail),
+              ],
+            ),
+          ),
+          if (widget.activityModel.locationName != null)
+            Padding(
+              padding: middleWidgetPadding,
+              child: Row(
+                children: [
+                  Icon(Icons.location_on),
+                  const SizedBox(width: 10),
+                  Text(widget.activityModel.locationName!),
+                ],
+              ),
+            ),
           if (widget.activityModel.categories.isNotEmpty)
             Padding(
               padding: middleWidgetPadding,
@@ -178,7 +391,8 @@ class _ActivityPageState extends State<ActivityPage> {
                 child: const Text("Leave Activity"),
               ),
             ),
-          if (!isJoining)
+          if (!isJoining &&
+              widget.activityModel.endDate.isAfter(DateTime.now()))
             Padding(
               padding: middleWidgetPadding,
               child: ElevatedButton(

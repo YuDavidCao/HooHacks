@@ -21,6 +21,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
   final TextEditingController _startDateTimeController =
       TextEditingController();
   final TextEditingController _endDateTimeController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -57,6 +58,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
     _contactEmailController.dispose();
     _startDateTimeController.dispose();
     _endDateTimeController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -176,6 +178,22 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   return null;
                 },
                 keyboardType: TextInputType.emailAddress,
+              ),
+            ),
+            Padding(
+              padding: middleWidgetPadding,
+              child: TextFormField(
+                controller: _locationController,
+                decoration: InputDecoration(
+                  labelText: "Location",
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      _titleController.clear();
+                    },
+                  ),
+                ),
               ),
             ),
             Padding(
@@ -352,6 +370,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   _endDate,
                   _categories,
                   _contactEmailController.text,
+                  _locationController.text,
                   activityImage,
                   context,
                 );

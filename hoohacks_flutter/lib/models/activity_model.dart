@@ -19,6 +19,7 @@ class ActivityModel {
   final int downvotes;
   final bool organizationOnly;
   final String? imageUrl;
+  final String? locationName;
   final double? weight;
 
   ActivityModel({
@@ -39,8 +40,9 @@ class ActivityModel {
     required this.upvotes,
     required this.downvotes,
     required this.organizationOnly,
+    this.locationName,
     this.imageUrl,
-    this.weight
+    this.weight,
   });
 
   Map<String, dynamic> toMap() {
@@ -60,6 +62,7 @@ class ActivityModel {
       'ContactEmail': contactEmail,
       'Upvotes': upvotes,
       'Downvotes': downvotes,
+      'LocationName': locationName,
       'OrganizationOnly': organizationOnly,
       'ImageUrl': imageUrl,
     };
@@ -83,6 +86,7 @@ class ActivityModel {
       contactEmail: map['ContactEmail'],
       upvotes: map['Upvotes'],
       downvotes: map['Downvotes'],
+      locationName: map['LocationName'],
       organizationOnly: map['OrganizationOnly'],
       imageUrl: map['ImageUrl'],
     );
@@ -113,6 +117,7 @@ class ActivityModel {
       upvotes: map['Upvotes'],
       downvotes: map['Downvotes'],
       organizationOnly: map['OrganizationOnly'],
+      locationName: map['LocationName'],
       imageUrl: map['ImageUrl'],
       weight: map['Weight'],
     );
@@ -120,6 +125,6 @@ class ActivityModel {
 
   @override
   String toString() {
-    return 'ActivityModel(id: $id, publisher: $publisher, title: $title, description: $description, createdDate: $createdDate, startDate: $startDate, endDate: $endDate, latitude: $latitude, longitude: $longitude, organization: $organization, categories: $categories, participants: $participants, limit: $limit, contactEmail: $contactEmail, upvotes: $upvotes, downvotes: $downvotes, organizationOnly: $organizationOnly, imageUrl: $imageUrl)';
+    return 'ActivityModel{publisher: $publisher, title: $title, description: $description, createdDate: $createdDate, startDate: $startDate, endDate: $endDate, latitude: $latitude, longitude: $longitude, organization: $organization, categories: $categories, participants: $participants, limit: $limit, contactEmail: $contactEmail, upvotes: $upvotes, downvotes: $downvotes, organizationOnly: $organizationOnly, imageUrl: $imageUrl, locationName: $locationName}';
   }
 }

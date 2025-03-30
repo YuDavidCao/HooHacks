@@ -361,7 +361,6 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               setState(() {
                 zoomLevel = position.zoom;
               });
-              print(zoomLevel);
             },
             mapType: mapType,
             initialCameraPosition: camera,

@@ -18,6 +18,7 @@ Future<bool> addActivity(
   DateTime endDate,
   List<String> categories,
   String contactEmail,
+  String locationName,
   File? image,
   BuildContext context,
 ) async {
@@ -50,6 +51,7 @@ Future<bool> addActivity(
       contactEmail: contactEmail,
       upvotes: 0,
       downvotes: 0,
+      locationName: locationName,
       organizationOnly: false, // hard coded
       imageUrl: downloadUrl,
     );
@@ -312,4 +314,15 @@ Future<ActivityModel?> getActivityById(String activityId) async {
     print("Error getting activity by ID: $e");
   }
   return null;
+}
+
+Future<Map<String, dynamic>> getUserInfo(String userId) async {
+  try {
+    final snapshot =
+        await FirebaseFirestore.instance.collection("users").doc(userId).get();
+    return snapshot.data()!;
+  } catch (e) {
+    print("Error getting user info: $e");
+  }
+  return {};
 }
