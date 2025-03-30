@@ -1,7 +1,7 @@
 # HooHacks
 ## This project is for the 2025 Hoo Hacks event 
 
-## Project Setup
+## Python Setup
 
 ### Prerequisites
 - Node.js: can be installed [here](https://nodejs.org/en)
@@ -39,3 +39,20 @@ create .env file in root directory. Paste the following and replace "YOUR_KEY" w
 ```
 GEMINI_API_KEY="YOUR_KEY"
 ```
+
+## ChromaDb Setup
+
+### Prerequisites
+
+docker pull chromadb:
+
+```
+docker run -v ./chroma-data:/data -p 4000:8000 chroma-core/chroma
+```
+
+Make sure that the port matches
+
+## Flutter Setup
+
+### Prerequisites
+- Make sure you have Flutter installed. All development is done on IOS simulator, additional setup are required for Android for packages like google_maps_flutter.

@@ -110,14 +110,18 @@ class _EditProfileInfoPageState extends State<EditProfileInfoPage> {
             Padding(
               padding: middleWidgetPadding,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   try {
-                    FirebaseAuth.instance.currentUser?.updateProfile(
-                      displayName: _usernameEditingController.text,
-                    );
-                    FirebaseAuth.instance.currentUser?.updateEmail(
+                    String photoUrl =
+                        FirebaseAuth.instance.currentUser!.photoURL!;
+                    await FirebaseAuth.instance.currentUser?.updateEmail(
                       _emailEditingController.text,
                     );
+                    await FirebaseAuth.instance.currentUser?.updateProfile(
+                      displayName: _usernameEditingController.text,
+                      photoURL: photoUrl,
+                    );
+
                     updateUser(
                       _usernameEditingController.text,
                       _emailEditingController.text,

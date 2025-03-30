@@ -280,7 +280,7 @@ Future<bool> updateUser(
     await FirebaseFirestore.instance
         .collection("users")
         .doc(FirebaseAuth.instance.currentUser?.uid)
-        .update({'name': username, 'email': email, 'bio': bio});
+        .update({'Username': username, 'Email': email, 'Bio': bio});
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("User updated!")));
