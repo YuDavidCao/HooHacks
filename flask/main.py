@@ -270,6 +270,21 @@ def get_relevant_activities():
     )
     return jsonify({"results": results}), 200
 
+@app.route('/delete-activity', methods=['POST']) 
+def delete_activity(): 
+    data = request.json 
+    if not data:
+        return jsonify({"error": "Invalid request"}), 400
+    id = data.get("Id")
+    collection_name = "activity_embeddings"
+    collection = get_or_create_collection(collection_name)  # Ensure collection exists
+
+    try:
+        collection.delete(ids=[id])
+        return {"message": f"Activity with ID {id} deleted successfully"}
+    except Exception as e:
+        return {"error": "Failed to delete activity", "details": str(e)}
+    
 @app.route('/get-users', methods=['GET'])
 def get_users():
     docs = users_collection.stream()
