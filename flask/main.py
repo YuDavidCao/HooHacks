@@ -259,11 +259,11 @@ def get_relevant_activities():
     ).embeddings
     collection = get_or_create_collection(COLLECTION_NAME)
     results = collection.query(
-        embeddings=[result_embeddings[0].values],
-        top_k=5,
+        query_embeddings=[result_embeddings[0].values],
+        n_results=1,
         where={
             "endDate": {
-                "lt": endDate
+                "$gt": endDate
             }
         }
     )

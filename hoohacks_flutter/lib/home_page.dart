@@ -156,13 +156,18 @@ class _HomePageState extends State<HomePage>
                     print(response.body);
                   });
             },
-            child: Icon(Icons.add),
+            child: Icon(Icons.get_app),
           ),
+          const SizedBox(width: 10),
           FloatingActionButton(
             onPressed: () {
               http
                   .post(
-                    Uri.parse("${baseUrl}/get-documents"),
+                    Uri.parse("${baseUrl}/get-relevant-activities"),
+                    body: jsonEncode({
+                      "EndDate": DateTime.now().microsecondsSinceEpoch,
+                      "Interests": "I want to eat apple!",
+                    }),
                     headers: {"Content-Type": "application/json"},
                   )
                   .then((response) {
