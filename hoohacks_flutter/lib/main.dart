@@ -6,6 +6,7 @@ import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase_options.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/states/activity_state.dart';
+import 'package:hoohacks/states/organization_state.dart';
 import 'package:hoohacks/states/theme_state.dart';
 import 'package:hoohacks/states/user_state.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => ActivityState()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => OrganizationState()),
         ChangeNotifierProvider(create: (context) => userState),
       ],
       child: GestureDetector(

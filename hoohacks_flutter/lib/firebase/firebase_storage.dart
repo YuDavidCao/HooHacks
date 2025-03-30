@@ -52,3 +52,26 @@ Future<String?> uploadProfilePicture(File file, BuildContext context) async {
     return null;
   }
 }
+
+Future<String?> addOrganizationPicture(String id, File file) async {
+  try {
+    final storageRef = FirebaseStorage.instance.ref();
+    final taskSnapshot = await storageRef
+        .child("organizations/$id/profile_picture.png")
+        .putFile(file);
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    return downloadUrl;
+  } catch (e) {
+    print(e);
+    return null;
+  }
+}
+
+Future<void> deleteOrganizationPicture(String id) async {
+  try {
+    final storageRef = FirebaseStorage.instance.ref();
+    await storageRef.child("organizations/$id/profile_picture.png").delete();
+  } catch (e) {
+    print(e);
+  }
+}

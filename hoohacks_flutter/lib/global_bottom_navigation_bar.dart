@@ -3,6 +3,7 @@ import 'package:hoohacks/interest_page.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/map_page.dart';
+import 'package:hoohacks/organization/organization_page.dart';
 import 'package:hoohacks/profile_page.dart';
 
 class GlobalBottomNavigationBar extends StatelessWidget {
@@ -56,6 +57,20 @@ class GlobalBottomNavigationBar extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => InterestPage()),
+                );
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.domain,
+              color: pageName == "OrganizationPage" ? ctaColor : Colors.black,
+            ),
+            onPressed: () {
+              if (pageName != "OrganizationPage") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => OrganizationPage()),
                 );
               }
             },

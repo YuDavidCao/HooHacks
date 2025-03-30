@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hoohacks/firebase/firebase_storage.dart';
 import 'package:hoohacks/firebase/flask_endpint.dart';
 import 'package:hoohacks/models/activity_model.dart';
+import 'package:hoohacks/models/organization_model.dart';
 import 'package:hoohacks/models/user_model.dart';
 
 Future<bool> addActivity(
@@ -19,6 +20,7 @@ Future<bool> addActivity(
   List<String> categories,
   String contactEmail,
   String locationName,
+  String? organizationId,
   File? image,
   BuildContext context,
 ) async {
@@ -51,6 +53,7 @@ Future<bool> addActivity(
       contactEmail: contactEmail,
       upvotes: 0,
       downvotes: 0,
+      organization: organizationId,
       locationName: locationName,
       organizationOnly: false, // hard coded
       imageUrl: downloadUrl,
@@ -353,4 +356,177 @@ Future<void> unsaveActivity(String activityId) async {
   } catch (e) {
     print("Error unsaving activity: $e");
   }
+}
+
+Future<void> createOrganization(
+  String name,
+  String description,
+  String contactEmail,
+  String location,
+  File? image,
+  BuildContext context,
+) async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    DocumentReference d = firestore.collection('organizations').doc();
+    String? imageUrl;
+    if (image != null) {
+      imageUrl = await addOrganizationPicture(d.id, image);
+    }
+    OrganizationModel organizationModel = OrganizationModel(
+      name: name,
+      description: description,
+      email: contactEmail,
+      profilePicture: imageUrl,
+      members: [],
+      admins: [FirebaseAuth.instance.currentUser?.uid ?? ''],
+      location: location,
+      createdDate: DateTime.now(),
+      activities: [],
+    );
+    d.set(organizationModel.toMap());
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Organization created!")));
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error creating organization!")),
+    );
+  }
+}
+
+Future<void> deleteOrganization(
+  OrganizationModel organization,
+  BuildContext context,
+) async {
+  try {
+    if (organization.profilePicture != null) {
+      await deleteOrganizationPicture(organization.id!);
+    }
+    await FirebaseFirestore.instance
+        .collection("organizations")
+        .doc(organization.id!)
+        .delete();
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Organization deleted!")));
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error deleting organization!")),
+    );
+  }
+}
+
+Future<List<OrganizationModel>> getOrganizations() async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    final snapshot = await firestore.collection('organizations').get();
+    return snapshot.docs
+        .map((doc) => OrganizationModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } catch (e) {
+    print("Error getting organizations: $e");
+  }
+  return [];
+}
+
+Future<void> joinOrganization(
+  String organizationId,
+  BuildContext context,
+) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("organizations")
+        .doc(organizationId)
+        .update({
+          'Members': FieldValue.arrayUnion([
+            FirebaseAuth.instance.currentUser?.uid,
+          ]),
+        });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Joined organization!")));
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error joining organization!")),
+    );
+  }
+}
+
+Future<void> leaveOrganization(
+  String organizationId,
+  BuildContext context,
+) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("organizations")
+        .doc(organizationId)
+        .update({
+          'Members': FieldValue.arrayRemove([
+            FirebaseAuth.instance.currentUser?.uid,
+          ]),
+        });
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Left organization!")));
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error leaving organization!")),
+    );
+  }
+}
+
+Future<List<ActivityModel>> getActivitiesByOrganization(
+  String organizationId,
+) async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    final snapshot =
+        await firestore
+            .collection('activities')
+            .orderBy('EndDate', descending: true)
+            .where('Organization', isEqualTo: organizationId)
+            .get();
+    print(organizationId);
+    return snapshot.docs
+        .map((doc) => ActivityModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } catch (e) {
+    print("Error getting activities by organization: $e");
+  }
+  return [];
+}
+
+Future<List<OrganizationModel>> getMyOrganizations() async {
+  try {
+    final firestore = FirebaseFirestore.instance;
+    final snapshot =
+        await firestore
+            .collection('organizations')
+            .where(
+              'Admins',
+              arrayContains: FirebaseAuth.instance.currentUser?.uid,
+            )
+            .get();
+    return snapshot.docs
+        .map((doc) => OrganizationModel.fromMap(doc.data(), doc.id))
+        .toList();
+  } catch (e) {
+    print("Error getting my organizations: $e");
+  }
+  return [];
+}
+
+Future<OrganizationModel?> getOrganizationsById(String organizationId) async {
+  try {
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection("organizations")
+            .doc(organizationId)
+            .get();
+    return OrganizationModel.fromMap(snapshot.data()!, snapshot.id);
+  } catch (e) {
+    print("Error getting organization by ID: $e");
+  }
+  return null;
 }
