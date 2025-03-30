@@ -230,6 +230,7 @@ Future<bool> createUser(
       interest: [],
       upvotedActivities: [],
       downvotedActivities: [],
+      savedActivities: [],
     );
     FirebaseFirestore.instance
         .collection("users")
@@ -262,6 +263,7 @@ Future<UserModel> getUser(String userId) async {
     interest: [],
     upvotedActivities: [],
     downvotedActivities: [],
+    savedActivities: [],
   );
 }
 
@@ -325,4 +327,30 @@ Future<Map<String, dynamic>> getUserInfo(String userId) async {
     print("Error getting user info: $e");
   }
   return {};
+}
+
+Future<void> saveActivity(String activityId) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .update({
+          'SavedActivities': FieldValue.arrayUnion([activityId]),
+        });
+  } catch (e) {
+    print("Error saving activity: $e");
+  }
+}
+
+Future<void> unsaveActivity(String activityId) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .update({
+          'SavedActivities': FieldValue.arrayRemove([activityId]),
+        });
+  } catch (e) {
+    print("Error unsaving activity: $e");
+  }
 }

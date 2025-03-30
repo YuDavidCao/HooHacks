@@ -6,6 +6,7 @@ import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase_options.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/states/activity_state.dart';
+import 'package:hoohacks/states/theme_state.dart';
 import 'package:hoohacks/states/user_state.dart';
 import 'package:provider/provider.dart';
 
@@ -24,32 +25,52 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ActivityState()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => userState),
       ],
       child: GestureDetector(
         onTap: () {
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
-            colorScheme: ColorScheme(
-              brightness: Brightness.light,
-              primary: ctaColor,
-              onPrimary: Colors.black,
-              secondary: ctaColor,
-              onSecondary: Colors.black,
-              error: Colors.red,
-              onError: Colors.red,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          home:
-              FirebaseAuth.instance.currentUser == null
-                  ? const AuthenticationPage()
-                  : const HomePage(),
+        child: Consumer<ThemeProvider>(
+          builder: (context, ThemeProvider themeProvider, child) {
+            return MaterialApp(
+              title: 'Flutter Demo',
+              themeMode: themeProvider.themeMode,
+              theme: ThemeData(
+                appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
+                colorScheme: ColorScheme(
+                  brightness: Brightness.light,
+                  primary: ctaColor,
+                  onPrimary: Colors.black,
+                  secondary: ctaColor,
+                  onSecondary: Colors.black,
+                  error: Colors.red,
+                  onError: Colors.red,
+                  surface: Colors.white,
+                  onSurface: Colors.black,
+                ),
+              ),
+              darkTheme: ThemeData.dark().copyWith(
+                appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
+                colorScheme: ColorScheme(
+                  brightness: Brightness.dark,
+                  primary: ctaColor,
+                  onPrimary: Colors.black,
+                  secondary: ctaColor,
+                  onSecondary: Colors.black,
+                  error: Colors.red,
+                  onError: Colors.red,
+                  surface: Colors.black,
+                  onSurface: Colors.white,
+                ),
+              ),
+              home:
+                  FirebaseAuth.instance.currentUser == null
+                      ? const AuthenticationPage()
+                      : const HomePage(),
+            );
+          },
         ),
       ),
     );

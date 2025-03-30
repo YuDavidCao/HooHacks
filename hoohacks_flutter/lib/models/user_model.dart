@@ -9,6 +9,7 @@ class UserModel {
   final List<String> interest;
   final List<String> upvotedActivities;
   final List<String> downvotedActivities;
+  final List<String> savedActivities;
 
   UserModel({
     this.id,
@@ -21,6 +22,7 @@ class UserModel {
     required this.interest,
     required this.upvotedActivities,
     required this.downvotedActivities,
+    required this.savedActivities,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +36,7 @@ class UserModel {
       'Interest': interest,
       'UpvotedActivities': upvotedActivities,
       'DownvotedActivities': downvotedActivities,
+      'SavedActivities': savedActivities,
     };
   }
 
@@ -49,11 +52,12 @@ class UserModel {
       interest: List<String>.from(map['Interest']),
       upvotedActivities: List<String>.from(map['UpvotedActivities']),
       downvotedActivities: List<String>.from(map['DownvotedActivities']),
+      savedActivities: List<String>.from(map['SavedActivities']),
     );
   }
 
   @override
   String toString() {
-    return 'UserModel{id: $id, name: $name, email: $email, username: $username, bio: $bio, organization: $organization, participating: $participating, interest: $interest, upvotedActivities: $upvotedActivities, downvotedActivities: $downvotedActivities}';
+    return 'UserModel{id: $id, name: $name, email: $email, username: $username, bio: $bio, organization: $organization, participating: $participating, interest: $interest, upvotedActivities: $upvotedActivities, downvotedActivities: $downvotedActivities, savedActivities: $savedActivities}';
   }
 }

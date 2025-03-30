@@ -19,6 +19,7 @@ class ActivityPage extends StatefulWidget {
 
 class _ActivityPageState extends State<ActivityPage> {
   bool isJoining = false;
+  late bool saved;
   late bool upvoted;
   late bool downvoted;
 
@@ -27,6 +28,10 @@ class _ActivityPageState extends State<ActivityPage> {
     isJoining = widget.activityModel.participants.contains(
       FirebaseAuth.instance.currentUser!.uid,
     );
+    saved = Provider.of<UserState>(
+      context,
+      listen: false,
+    ).userModel!.savedActivities.contains(widget.activityModel.id);
     upvoted = Provider.of<UserState>(
       context,
       listen: false,
@@ -93,9 +98,8 @@ class _ActivityPageState extends State<ActivityPage> {
                       context,
                       MaterialPageRoute(
                         builder:
-                            (context) => MapPage(
-                              activityModel: widget.activityModel,
-                            ),
+                            (context) =>
+                                MapPage(activityModel: widget.activityModel),
                       ),
                     );
                   },
@@ -421,6 +425,18 @@ class _ActivityPageState extends State<ActivityPage> {
               ),
             ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            saved
+                ? unsaveActivity(widget.activityModel.id!)
+                : saveActivity(widget.activityModel.id!);
+            saved = !saved;
+          });
+        },
+        backgroundColor: saved ? ctaColor : Colors.grey[50],
+        child: saved ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
       ),
     );
   }

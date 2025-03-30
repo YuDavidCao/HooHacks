@@ -9,7 +9,9 @@ import 'package:hoohacks/firebase/firebase_auth.dart';
 import 'package:hoohacks/firebase/firebase_storage.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/settings_sheet.dart';
+import 'package:hoohacks/states/theme_state.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -152,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.settings),
+                              Icon(Icons.map_outlined),
                               SizedBox(width: 10),
                               Text("Map Settings"),
                             ],
@@ -162,6 +164,52 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
+                  // Divider(color: Theme.of(context).colorScheme.primary),
+                  // GestureDetector(
+                  //   behavior: HitTestBehavior.opaque,
+                  //   onTap: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => const EditProfileInfoPage(),
+                  //       ),
+                  //     );
+                  //   },
+                  //   child: Consumer<ThemeProvider>(
+                  //     builder: (context, ThemeProvider themeProvider, child) {
+                  //       return Padding(
+                  //         padding: EdgeInsets.symmetric(
+                  //           vertical: 0,
+                  //           horizontal: 2),
+                  //         child: Row(
+                  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //           children: [
+                  //             Row(
+                  //               children: [
+                  //                 themeProvider.themeMode == ThemeMode.dark
+                  //                     ? Icon(Icons.light_mode)
+                  //                     : Icon(Icons.dark_mode),
+                  //                 SizedBox(width: 10),
+                  //                 Text("Dark Mode"),
+                  //               ],
+                  //             ),
+                  //             Transform.scale(
+                  //               scale: 0.8,
+                  //               child: Switch(
+                  //                 padding: EdgeInsets.zero,
+                  //                 value:
+                  //                     themeProvider.themeMode == ThemeMode.dark,
+                  //                 onChanged: (value) {
+                  //                   themeProvider.toggleTheme(value);
+                  //                 },
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
             ),

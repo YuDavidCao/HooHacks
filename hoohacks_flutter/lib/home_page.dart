@@ -10,6 +10,7 @@ import 'package:hoohacks/firebase/firebase_firestore.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/activity_state.dart';
+import 'package:hoohacks/states/user_state.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,7 +27,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       setState(() {});
     });
@@ -51,6 +52,7 @@ class _HomePageState extends State<HomePage>
               const Tab(icon: Icon(Icons.calendar_month), text: 'Upcoming'),
               const Tab(icon: Icon(Icons.celebration), text: 'All Activities'),
               const Tab(icon: Icon(Icons.person), text: 'By Me'),
+              const Tab(icon: Icon(Icons.bookmark), text: 'Saved'),
             ],
           ),
           Flexible(
@@ -78,6 +80,16 @@ class _HomePageState extends State<HomePage>
                                 FirebaseAuth.instance.currentUser!.uid,
                           )
                           .toList();
+                } else if (_tabController.index == 3) {
+                  activities =
+                      activities
+                          .where(
+                            (activity) => Provider.of<UserState>(
+                              context,
+                              listen: false,
+                            ).userModel!.savedActivities.contains(activity.id),
+                          )
+                          .toList();
                 }
 
                 print(activities);
@@ -91,7 +103,12 @@ class _HomePageState extends State<HomePage>
                       crossAxisSpacing: 8.0,
                       children: List.generate(activities.length, (index) {
                         final activity = activities[index];
+                        bool saved = Provider.of<UserState>(
+                          context,
+                          listen: false,
+                        ).userModel!.savedActivities.contains(activity.id);
                         return GestureDetector(
+                          key: ValueKey(activity.id),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -102,74 +119,91 @@ class _HomePageState extends State<HomePage>
                               ),
                             );
                           },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.grey,
-                                  blurRadius: 5.0,
-                                  offset: Offset(0, 3),
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.grey,
+                                      blurRadius: 5.0,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (activity.imageUrl != null)
-                                  ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(10),
-                                      topRight: Radius.circular(10),
-                                    ),
-                                    child: Hero(
-                                      tag: activity.imageUrl!,
-                                      child: Image.network(
-                                        activity.imageUrl!,
-                                        fit: BoxFit.cover,
-                                        height: 100,
-                                        width: double.infinity,
-                                      ),
-                                    ),
-                                  ),
-                                Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        activity.title,
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (activity.imageUrl != null)
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                        ),
+                                        child: Hero(
+                                          tag: activity.imageUrl!,
+                                          child: Image.network(
+                                            activity.imageUrl!,
+                                            fit: BoxFit.cover,
+                                            height: 100,
+                                            width: double.infinity,
+                                          ),
                                         ),
                                       ),
-                                      Text(activity.description),
-                                      Wrap(
-                                        runSpacing: -10,
+                                    Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          for (var category
-                                              in activity.categories) ...[
-                                            Chip(
-                                              padding: const EdgeInsets.all(3),
-                                              label: Text(
-                                                category,
-                                                style: TextStyle(fontSize: 12),
-                                              ),
-                                              labelPadding:
-                                                  const EdgeInsets.all(0),
+                                          Text(
+                                            activity.title,
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            const SizedBox(width: 3),
-                                          ],
+                                          ),
+                                          Text(activity.description),
+                                          Wrap(
+                                            runSpacing: -10,
+                                            children: [
+                                              for (var category
+                                                  in activity.categories) ...[
+                                                Chip(
+                                                  padding: const EdgeInsets.all(
+                                                    3,
+                                                  ),
+                                                  label: Text(
+                                                    category,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  labelPadding:
+                                                      const EdgeInsets.all(0),
+                                                ),
+                                                const SizedBox(width: 3),
+                                              ],
+                                            ],
+                                          ),
                                         ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: SavedButton(
+                                  activity: activity,
+                                  saved: saved,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }),
@@ -267,6 +301,42 @@ class _HomePageState extends State<HomePage>
       //         });
       //   },
       // ),
+    );
+  }
+}
+
+class SavedButton extends StatefulWidget {
+  final ActivityModel activity;
+  final bool saved;
+  const SavedButton({super.key, required this.activity, required this.saved});
+
+  @override
+  State<SavedButton> createState() => _SavedButtonState();
+}
+
+class _SavedButtonState extends State<SavedButton> {
+  late bool saved;
+
+  @override
+  void initState() {
+    saved = widget.saved;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton.small(
+      heroTag: null,
+      onPressed: () {
+        setState(() {
+          saved
+              ? unsaveActivity(widget.activity.id!)
+              : saveActivity(widget.activity.id!);
+          saved = !saved;
+        });
+      },
+      backgroundColor: saved ? ctaColor : Colors.grey[200],
+      child: saved ? Icon(Icons.bookmark) : Icon(Icons.bookmark_border),
     );
   }
 }
