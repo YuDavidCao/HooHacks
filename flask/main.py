@@ -55,7 +55,7 @@ def get_activities():
 
     user_id = data.get("Uid")
     user_latitude = float(data.get("Latitude", 38.0356)) # default to Rotunda coordinates 
-    user_longitude = float(data.get("Longitude", 78.5034))
+    user_longitude = float(data.get("Longitude", -78.5034))
     user_categories = data.get("Categories", []) 
     user_distance = convert_to_kilometers(float(data.get("Distances", 7.0)))
     user_search = data.get("SearchString", "")
@@ -91,7 +91,6 @@ def get_activities():
         longitude = activity.get("Longitude")
         distance = get_distance(user_latitude, user_longitude, latitude, longitude)
 
-        print(distance);
         if distance > user_distance:
             continue
 

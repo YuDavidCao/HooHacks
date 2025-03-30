@@ -9,7 +9,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Load the events from your JSON file
-with open("activities_test.json") as f:
+with open("activities.json") as f:
     events = json.load(f)
 
 # Convert string timestamps to datetime objects
