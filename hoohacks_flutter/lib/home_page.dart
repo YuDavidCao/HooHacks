@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hoohacks/activity_page.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
@@ -81,61 +82,96 @@ class _HomePageState extends State<HomePage>
 
                 print(activities);
 
-                return ListView(
-                  children: [
-                    for (var activity in activities) ...[
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder:
-                                  (context) =>
-                                      ActivityPage(activityModel: activity),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          margin: middleWidgetPadding,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.grey,
-                                blurRadius: 5.0,
-                                offset: Offset(0, 3),
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: StaggeredGrid.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
+                      children: List.generate(activities.length, (index) {
+                        final activity = activities[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        ActivityPage(activityModel: activity),
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                activity.title,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.grey,
+                                  blurRadius: 5.0,
+                                  offset: Offset(0, 3),
                                 ),
-                              ),
-                              Text(activity.description),
-                              Wrap(
-                                children: [
-                                  for (var categories
-                                      in activity.categories) ...[
-                                    Chip(label: Text(categories)),
-                                    SizedBox(width: 5),
-                                  ],
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (activity.imageUrl != null)
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                    ),
+                                    child: Image.network(
+                                      activity.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      height: 100,
+                                      width: double.infinity,
+                                    ),
+                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        activity.title,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(activity.description),
+                                      Wrap(
+                                        runSpacing: -10,
+                                        children: [
+                                          for (var category
+                                              in activity.categories) ...[
+                                            Chip(
+                                              padding: const EdgeInsets.all(3),
+                                              label: Text(
+                                                category,
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                              labelPadding:
+                                                  const EdgeInsets.all(0),
+                                            ),
+                                            const SizedBox(width: 3),
+                                          ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ],
+                        );
+                      }),
+                    ),
+                  ),
                 );
               },
             ),

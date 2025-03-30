@@ -12,7 +12,7 @@ Future<String?> uploadActivityImage(
   try {
     final storageRef = FirebaseStorage.instance.ref();
     final activitySnapshot = await storageRef
-        .child("activities/$docId,png")
+        .child("activities/$docId.png")
         .putFile(file);
     String downloadUrl = await activitySnapshot.ref.getDownloadURL();
     return downloadUrl;
@@ -22,6 +22,15 @@ Future<String?> uploadActivityImage(
       const SnackBar(content: Text("Failed to upload activity picture")),
     );
     return null;
+  }
+}
+
+Future<void> deleteActivityImage(String docId) async {
+  try {
+    final storageRef = FirebaseStorage.instance.ref();
+    await storageRef.child("activities/$docId.png").delete();
+  } catch (e) {
+    print(e);
   }
 }
 
