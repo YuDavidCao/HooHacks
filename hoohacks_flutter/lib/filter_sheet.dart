@@ -4,12 +4,16 @@ import 'package:hoohacks/constant.dart';
 class FilterSheet extends StatefulWidget {
   final List<String> categories;
   final ScrollController scrollController;
+  final String distanceFilter;
   final Function setDistanceFilter;
+  final Function onFilterChanged;
   const FilterSheet({
     super.key,
     required this.scrollController,
     required this.categories,
+    required this.distanceFilter,
     required this.setDistanceFilter,
+    required this.onFilterChanged,
   });
 
   @override
@@ -18,6 +22,12 @@ class FilterSheet extends StatefulWidget {
 
 class _FilterSheetState extends State<FilterSheet> {
   String distanceFilter = "none";
+
+  @override
+  void initState() {
+    distanceFilter =  widget.distanceFilter;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +117,7 @@ class _FilterSheetState extends State<FilterSheet> {
                           } else {
                             widget.categories.remove(category);
                           }
+                          widget.onFilterChanged();
                         });
                       },
                     ),

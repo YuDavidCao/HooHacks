@@ -25,18 +25,16 @@ class ActivityState extends ChangeNotifier {
     activitySubscription = FirebaseFirestore.instance
         .collection('activities')
         .orderBy('StartDate', descending: true)
-        .where('EndDate', isLessThan: DateTime.now())
+        .where('EndDate', isNotEqualTo: DateTime.now())
         .snapshots()
         .listen((QuerySnapshot snapshot) {
           activities =
-              snapshot.docs
-                  .map(
-                    (DocumentSnapshot doc) => ActivityModel.fromMap(
-                      doc.data()! as Map<String, dynamic>,
-                      doc.id,
-                    ),
-                  )
-                  .toList();
+              snapshot.docs.map((DocumentSnapshot doc) {
+                return ActivityModel.fromMap(
+                  doc.data()! as Map<String, dynamic>,
+                  doc.id,
+                );
+              }).toList();
           notifyListeners();
           // bool hasChanges = false;
           // snapshot.docChanges.forEach((DocumentChange docChange) {

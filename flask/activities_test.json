@@ -1,0 +1,41 @@
+{
+    "Batten Admission": {
+        "Latitude": 37.631108,
+        "Longitude": -76.579912,
+        "Upvotes": 300,
+        "Downvotes": 28,
+        "Participants":["user1", "user2"],
+        "Categories":["Admissions", "2nd Year", "Information Session"],
+        "ContactEmail":"batten@virginia.edu",
+        "CreatedDate": "2025-03-09T19:00:00Z",
+        "Description": "Welcome to Batten School of Public Policy!",
+        "EndDate": "2025-03-30T19:00:00Z",
+        "ImageUrl": null,
+        "Limit": null,
+        "Organization": null,
+        "OrganizationOnly": false,
+        "Publisher": "Batten School",
+        "StartDate": "2025-03-30T10:30:00Z",
+        "Title": "Batten Admitted Students Day"
+    },
+    "Tai Chi": {
+        "Latitude": 38.883062,
+        "Longitude": -77.290139,
+        "Upvotes": 32,
+        "Downvotes": 7,
+        "Participants":["user1", "user2"],
+        "Categories":["Athletics", "Workshop", "Student Activity"],
+        "ContactEmail":"taichi@virginia.edu",
+        "CreatedDate": "2025-03-10T19:00:00Z",
+        "Description": "Do you want to do Tai Chi?",
+        "EndDate": "2025-03-31T13:00:00Z",
+        "ImageUrl": null,
+        "Limit": null,
+        "Organization": null,
+        "OrganizationOnly": false,
+        "Publisher": "Tai Chi Club",
+        "StartDate": "2025-03-31T12:00:00Z",
+        "Title": "T'ai Chi"
+    }
+    
+}

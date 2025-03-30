@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class ActivityModel {
   final String? id;
   final String publisher;
@@ -44,9 +46,9 @@ class ActivityModel {
       'Publisher': publisher,
       'Title': title,
       'Description': description,
-      'CreatedDate': createdDate.toIso8601String(),
-      'StartDate': startDate.toIso8601String(),
-      'EndDate': endDate.toIso8601String(),
+      'CreatedDate': createdDate,
+      'StartDate': startDate,
+      'EndDate': endDate,
       'Latitude': latitude,
       'Longitude': longitude,
       'Organization': organization,
@@ -67,9 +69,9 @@ class ActivityModel {
       publisher: map['Publisher'],
       title: map['Title'],
       description: map['Description'],
-      createdDate: DateTime.parse(map['CreatedDate']),
-      startDate: DateTime.parse(map['StartDate']),
-      endDate: DateTime.parse(map['EndDate']),
+      createdDate: map['CreatedDate'].toDate(),
+      startDate: map['StartDate'].toDate(),
+      endDate: map['EndDate'].toDate(),
       latitude: map['Latitude'],
       longitude: map['Longitude'],
       organization: map['Organization'],
@@ -82,5 +84,39 @@ class ActivityModel {
       organizationOnly: map['OrganizationOnly'],
       imageUrl: map['ImageUrl'],
     );
+  }
+
+  static ActivityModel fromFlask(Map<String, dynamic> map, String id) {
+    return ActivityModel(
+      id: id,
+      publisher: map['Publisher'],
+      title: map['Title'],
+      description: map['Description'],
+      createdDate: DateFormat(
+        "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+      ).parseUtc(map['CreatedDate']),
+      startDate: DateFormat(
+        "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+      ).parseUtc(map['StartDate']),
+      endDate: DateFormat(
+        "EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+      ).parseUtc(map['EndDate']),
+      latitude: map['Latitude'],
+      longitude: map['Longitude'],
+      organization: map['Organization'],
+      categories: List<String>.from(map['Categories']),
+      participants: List<String>.from(map['Participants']),
+      limit: map['Limit'],
+      contactEmail: map['ContactEmail'],
+      upvotes: map['Upvotes'],
+      downvotes: map['Downvotes'],
+      organizationOnly: map['OrganizationOnly'],
+      imageUrl: map['ImageUrl'],
+    );
+  }
+
+  @override
+  String toString() {
+    return 'ActivityModel(id: $id, publisher: $publisher, title: $title, description: $description, createdDate: $createdDate, startDate: $startDate, endDate: $endDate, latitude: $latitude, longitude: $longitude, organization: $organization, categories: $categories, participants: $participants, limit: $limit, contactEmail: $contactEmail, upvotes: $upvotes, downvotes: $downvotes, organizationOnly: $organizationOnly, imageUrl: $imageUrl)';
   }
 }
