@@ -7,6 +7,8 @@ from datetime import datetime, timedelta, timezone
 import random
 import json
 import string
+import uuid 
+import requests  
 from google import genai
 from dotenv import load_dotenv
 import os
@@ -47,6 +49,18 @@ def scrape():
 
     driver.quit()
 
+def generate_event_description(event_title):
+    """Generates an event description using Gemini based on the event title."""
+    try:
+        prompt = f"Write a short, direct description for the event: '{event_title}'. Keep it to one or two sentences. Only type the description and nothing else."
+        response = gemini_client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt]
+        )
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error generating description for '{event_title}': {e}")
+        return "Event description not available."
 
 def generate_random_date_week_ahead():
     """Generates a random datetime at least a week ahead."""
@@ -70,33 +84,76 @@ def generate_random_email():
     random_part = ''.join(random.choice(characters) for _ in range(5))
     return f"{random_part}@virginia.edu"
 
-def write_json(link_elements, location_elements, image_sources):
+def create_simple_event_json(title, description, end_date, id):
+    """
+    Creates a simple JSON dictionary with title, description, id, and end_date.
+
+    Args:
+        title (str): The title of the event.
+        description (str): The description of the event.
+        end_date (str): The end date of the event in ISO format.
+
+    Returns:
+        dict: A dictionary representing the event data.
+    """
+    if isinstance(end_date, str):
+        end_date = datetime.fromisoformat(end_date)
+
+    event_data = {
+        "Title": title,
+        "Description": description,
+        "Id": id,
+        "EndDate": end_date.timestamp()
+    }
+    print(event_data)
+    return event_data
+
+def get_organization_name(event_title):
+    """Generates an organization using Gemini based on the event title."""
+    try:
+        prompt = f"Write an organization named based at the University of Virginia based on the title of the event: '{event_title}'. Only type the organization name and nothing else."
+        response = gemini_client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[prompt]
+        )
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error generating description for '{event_title}': {e}")
+        return "Event description not available."
+
+def write_json(link_elements, location_elements, image_sources, output_file='events.json'):
     event_data = {}
     for i in range(0, (len(link_elements)) - 2):
         title = link_elements[i].text
         location = location_elements[i].text
         image = image_sources[i]
 
-        lat_offset = random.uniform(-0.05, 0.05)
-        lon_offset = random.uniform(-0.05, 0.05)
+        lat_offset = random.uniform(-0.002, 0.002)
+        lon_offset = random.uniform(-0.002, 0.002)
 
         start_date = generate_random_date_week_ahead()
         end_date = start_date + timedelta(days=random.randint(6, 8)) #around 7 days.
 
-        event_data[title] = {
+        title = link_elements[i].text
+        description = generate_event_description(title)
+        
+        id = str(uuid.uuid4()) 
+        end_date = end_date.isoformat()
+
+        event_data[id] = {
             "Latitude": 38.0356 + lat_offset,
             "Longitude": -78.5034 + lon_offset,
             "Upvotes": random.randint(0, 120),
             "Downvotes": random.randint(0, 40),
-            "Participants": generate_random_participants,
+            "Participants": generate_random_participants(),
             "Categories": [get_random_event_type(), get_random_event_type()],
             "ContactEmail": generate_random_email(),
             "CreatedDate": datetime.now(timezone.utc).isoformat(),
-            "Description": "Event description goes here.",
-            "EndDate": end_date.isoformat(),
+            "Description": description,
+            "EndDate": end_date,
             "ImageUrl": image,
             "Limit": random.randint(50, 200),
-            "Organization": "UVA",
+            "Organization": get_organization_name(title),
             "OrganizationOnly": False,
             "Publisher": generate_random_publisher(),
             "StartDate": start_date.isoformat(),
@@ -104,8 +161,19 @@ def write_json(link_elements, location_elements, image_sources):
             "Location": location,
             "Date": start_date.isoformat(),
         }
-    json_output = json.dumps(event_data, indent=4)
-    print(json_output)
+        try:
+            response = requests.post('http://127.0.0.1:8000/store-activity', json=create_simple_event_json(title, description, end_date, id))
+            response.raise_for_status()
+            print(f"Data sent successfully for event {title}. Response: {response.json()}")
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to send data for event {title}: {e}")
+    try:
+        output_file_path = f"/flask/{output_file}"
+        with open(output_file_path, 'w') as json_file:
+            json.dump(event_data, json_file, indent=4)
+        print(f"Event data written to {output_file_path}")
+    except IOError as e:
+        print(f"Error writing to file {output_file}: {e}")
 
 def get_random_event_type():
     event_types = [
