@@ -286,8 +286,11 @@ Future<bool> updateUser(
   return false;
 }
 
-void deleteActivity(String activityId) async {
+void deleteActivity(String activityId, String? imageUrl) async {
   try {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      await deleteActivityImage(activityId);
+    }
     await FirebaseFirestore.instance
         .collection("activities")
         .doc(activityId)

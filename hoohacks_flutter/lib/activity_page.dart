@@ -194,7 +194,10 @@ class _ActivityPageState extends State<ActivityPage> {
               padding: middleWidgetPadding,
               child: ElevatedButton(
                 onPressed: () {
-                  deleteActivity(widget.activityModel.id!);
+                  deleteActivity(
+                    widget.activityModel.id!,
+                    widget.activityModel.imageUrl,
+                  );
                   Navigator.pop(context);
                 },
                 child: const Text("Delete Activity"),

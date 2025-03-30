@@ -12,12 +12,6 @@ Future<List<ActivityModel>> getFilteredActivities(
   String distance,
   String searchString,
 ) async {
-  print(longitude);
-  print(latitude);
-  print(categories);
-  print(distance);
-  print(searchString);
-  print(disToMiles(distance));
   final response = await http.post(
     Uri.parse("$baseUrl/get-activity"),
     body: jsonEncode({

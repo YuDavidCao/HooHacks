@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hoohacks/chat_page.dart';
+import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/map_page.dart';
 import 'package:hoohacks/profile_page.dart';
@@ -16,7 +18,10 @@ class GlobalBottomNavigationBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
-            icon: const Icon(Icons.home),
+            icon: Icon(
+              Icons.home,
+              color: pageName == "HomePage" ? ctaColor : Colors.black,
+            ),
             onPressed: () {
               if (pageName != "HomePage") {
                 Navigator.pushReplacement(
@@ -27,7 +32,11 @@ class GlobalBottomNavigationBar extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.map),
+            icon: Icon(
+              Icons.map,
+              color: pageName == "MapPage" ? ctaColor : Colors.black,
+            ),
+
             onPressed: () {
               if (pageName != "MapPage") {
                 Navigator.pushReplacement(
@@ -38,7 +47,24 @@ class GlobalBottomNavigationBar extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.person),
+            icon: Icon(
+              Icons.interests,
+              color: pageName == "ChatPage" ? ctaColor : Colors.black,
+            ),
+            onPressed: () {
+              if (pageName != "ChatPage") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatPage()),
+                );
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.person,
+              color: pageName == "ProfilePage" ? ctaColor : Colors.black,
+            ),
             onPressed: () {
               if (pageName != "ProfilePage") {
                 Navigator.pushReplacement(
