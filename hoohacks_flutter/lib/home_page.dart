@@ -10,6 +10,7 @@ import 'package:hoohacks/global_bottom_navigation_bar.dart';
 import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/states/activity_state.dart';
 import 'package:hoohacks/states/user_state.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -227,128 +228,155 @@ class _HomePageState extends State<HomePage>
 
                 print(activities);
 
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: StaggeredGrid.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 8.0,
-                      crossAxisSpacing: 8.0,
-                      children: List.generate(activities.length, (index) {
-                        final activity = activities[index];
-                        bool saved = Provider.of<UserState>(
-                          context,
-                          listen: false,
-                        ).userModel!.savedActivities.contains(activity.id);
-                        return GestureDetector(
-                          key: ValueKey(activity.id),
-                          onTap: () {
-                            Navigator.push(
+                return activities.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: 300,
+                            width: 300,
+                            child: Lottie.asset(
+                              'assets/animations/animation.json',
+                            ),
+                          ),
+                          Text(
+                            "No activities found",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    )
+                    : SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: StaggeredGrid.count(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 8.0,
+                          crossAxisSpacing: 8.0,
+                          children: List.generate(activities.length, (index) {
+                            final activity = activities[index];
+                            bool saved = Provider.of<UserState>(
                               context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) =>
-                                        ActivityPage(activityModel: activity),
-                              ),
-                            );
-                          },
-                          child: Stack(
-                            children: [
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: Colors.grey,
-                                      blurRadius: 5.0,
-                                      offset: Offset(0, 3),
+                              listen: false,
+                            ).userModel!.savedActivities.contains(activity.id);
+                            return GestureDetector(
+                              key: ValueKey(activity.id),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ActivityPage(
+                                          activityModel: activity,
+                                        ),
+                                  ),
+                                );
+                              },
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Theme.of(context).colorScheme.surface,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.grey,
+                                          blurRadius: 5.0,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (activity.imageUrl != null)
-                                      ClipRRect(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10),
-                                        ),
-                                        child: Hero(
-                                          tag: activity.imageUrl!,
-                                          child: Image.network(
-                                            activity.imageUrl!,
-                                            fit: BoxFit.cover,
-                                            height: 100,
-                                            width: double.infinity,
-                                          ),
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            activity.title,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        if (activity.imageUrl != null)
+                                          ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                  topLeft: Radius.circular(10),
+                                                  topRight: Radius.circular(10),
+                                                ),
+                                            child: Hero(
+                                              tag: activity.imageUrl!,
+                                              child: Image.network(
+                                                activity.imageUrl!,
+                                                fit: BoxFit.cover,
+                                                height: 100,
+                                                width: double.infinity,
+                                              ),
                                             ),
                                           ),
-                                          Text(
-                                            activity.description,
-                                            maxLines: 5,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          Wrap(
-                                            runSpacing: -10,
+                                        Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              for (var category
-                                                  in activity.categories) ...[
-                                                Chip(
-                                                  padding: const EdgeInsets.all(
-                                                    3,
-                                                  ),
-                                                  label: Text(
-                                                    category,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  labelPadding:
-                                                      const EdgeInsets.all(0),
+                                              Text(
+                                                activity.title,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                                const SizedBox(width: 3),
-                                              ],
+                                              ),
+                                              Text(
+                                                activity.description,
+                                                maxLines: 5,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Wrap(
+                                                runSpacing: -10,
+                                                children: [
+                                                  for (var category
+                                                      in activity
+                                                          .categories) ...[
+                                                    Chip(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            3,
+                                                          ),
+                                                      label: Text(
+                                                        category,
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                      labelPadding:
+                                                          const EdgeInsets.all(
+                                                            0,
+                                                          ),
+                                                    ),
+                                                    const SizedBox(width: 3),
+                                                  ],
+                                                ],
+                                              ),
                                             ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: SavedButton(
+                                      activity: activity,
+                                      saved: saved,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: SavedButton(
-                                  activity: activity,
-                                  saved: saved,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                );
+                            );
+                          }),
+                        ),
+                      ),
+                    );
               },
             ),
           ),

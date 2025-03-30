@@ -438,6 +438,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         );
                         if (confirmDelete) {
                           deleteAccount();
+                          SharedPreferences.getInstance().then((sharedPref) {
+                            sharedPref.clear();
+                          });
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(

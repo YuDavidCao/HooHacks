@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
         child: Consumer<ThemeProvider>(
           builder: (context, ThemeProvider themeProvider, child) {
             return MaterialApp(
+              debugShowCheckedModeBanner: false,
               title: 'Flutter Demo',
               themeMode: themeProvider.themeMode,
               theme: ThemeData(

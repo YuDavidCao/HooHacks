@@ -50,6 +50,7 @@ dependencies:
   shared_preferences: ^2.5.3
   url_launcher: ^6.3.1
   tutorial_coach_mark: ^1.2.13
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +91,7 @@ flutter:
     - assets/markers/m5.png
     - assets/markers/current.png
     - assets/images/profile.png
+    - assets/animations/animation.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
