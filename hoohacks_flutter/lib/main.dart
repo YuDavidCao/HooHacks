@@ -29,12 +29,18 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-          appBarTheme: const AppBarTheme(
-            backgroundColor: ctaColor,
+          appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
+          colorScheme: ColorScheme(
+            brightness: Brightness.light,
+            primary: ctaColor,
+            onPrimary: Colors.black,
+            secondary: ctaColor,
+            onSecondary: Colors.black,
+            error: Colors.red,
+            onError: Colors.red,
+            surface: Colors.white,
+            onSurface: Colors.black,
           ),
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 255, 64, 0),
-          ).copyWith(),
         ),
         home:
             FirebaseAuth.instance.currentUser == null

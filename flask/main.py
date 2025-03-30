@@ -12,6 +12,7 @@ from google import genai
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+COLLECTION_NAME = "activity_embeddings"
 
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -29,7 +30,7 @@ users_collection = db.collection("users")
 activities_collection = db.collection("activities")
 
 # Chroma DB setup 
-client = chromadb.Client()
+client = chromadb.HttpClient(host='localhost', port=4000)
 
 def get_or_create_collection(collection_name):
     try:
@@ -156,9 +157,9 @@ def get_weight(distance, participants, upvotes, downvotes):
     """
     # Constants for adjusting the importance of each factor
     MAX_RELEVANT_DISTANCE = 7.0  # km (adjusted down for more local focus)
-    DISTANCE_WEIGHT = 0.5  # High weight for proximity
-    PARTICIPANTS_WEIGHT = 0.2
-    VOTES_WEIGHT = 0.3
+    DISTANCE_WEIGHT = 0.2 # Low weight for proximity 
+    PARTICIPANTS_WEIGHT = 0.4
+    VOTES_WEIGHT = 0.4
     
     # Calculate distance score (closer = higher score)
     # With 3km being the typical range, use a steeper falloff curve
@@ -224,8 +225,7 @@ def store_activity():
         contents=combined
     ).embeddings # array of embeddings basd on combined string 
 
-    collection_name = "activity_embeddings"
-    collection = get_or_create_collection(collection_name)
+    collection = get_or_create_collection(COLLECTION_NAME)
 
     try:
         collection.add(
@@ -239,9 +239,35 @@ def store_activity():
         return jsonify({"error": "Failed to add document", "details": str(e)}), 500
     return jsonify({"message": "Activity stored successfully"}), 200 
 
+# testing
+@app.route('/get-documents', methods=['GET'])
+def get_documents():
+    collection = get_or_create_collection(COLLECTION_NAME)
+    documents = collection.get()
+    return jsonify({"documents": documents}), 200
+
 @app.route('/get-relevant-activities', methods=['POST'])
 def get_relevant_activities():
-    pass 
+    data = request.json
+    if not data:
+        return jsonify({"error": "Invalid request"}), 400
+    endDate = int(data.get("EndDate"))
+    interests = data.get("Interests", [])
+    result_embeddings = gemini_client.models.embed_content(
+        model="gemini-embedding-exp-03-07",
+        contents=interests
+    ).embeddings
+    collection = get_or_create_collection(COLLECTION_NAME)
+    results = collection.query(
+        embeddings=[result_embeddings[0].values],
+        top_k=5,
+        where={
+            "endDate": {
+                "lt": endDate
+            }
+        }
+    )
+    return jsonify({"results": results}), 200
 
 @app.route('/get-users', methods=['GET'])
 def get_users():

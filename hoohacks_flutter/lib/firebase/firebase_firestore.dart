@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/firebase/firebase_storage.dart';
+import 'package:hoohacks/firebase/flask_endpint.dart';
 import 'package:hoohacks/models/activity_model.dart';
 import 'package:hoohacks/models/user_model.dart';
 
@@ -25,6 +26,9 @@ Future<bool> addActivity(
     final firestore = FirebaseFirestore.instance;
 
     DocumentReference d = firestore.collection('activities').doc();
+
+    storeDocumentInChroma(activityName, description, d.id, endDate);
+
     String? downloadUrl;
     if (image != null) {
       downloadUrl = await uploadActivityImage(image, d.id, context);
@@ -49,7 +53,6 @@ Future<bool> addActivity(
       organizationOnly: false, // hard coded
       imageUrl: downloadUrl,
     );
-
     d.set(activityModel.toMap());
     return true;
   } catch (e) {

@@ -51,3 +51,21 @@ double disToMiles(String distance) {
       return 10000;
   }
 }
+
+Future<void> storeDocumentInChroma(
+  String title,
+  String description,
+  String docId,
+  DateTime endDate,
+) async {
+  final response = await http.post(
+    Uri.parse("$baseUrl/store-activity"),
+    body: jsonEncode({
+      "Id": docId,
+      "Title": title,
+      "Description": description,
+      "EndDate": endDate.microsecondsSinceEpoch,
+    }),
+    headers: {"Content-Type": "application/json"},
+  );
+}

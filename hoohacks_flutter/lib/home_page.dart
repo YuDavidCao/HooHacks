@@ -143,6 +143,36 @@ class _HomePageState extends State<HomePage>
         ],
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
+      floatingActionButton: Wrap(
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              http
+                  .get(
+                    Uri.parse("${baseUrl}/get-documents"),
+                    headers: {"Content-Type": "application/json"},
+                  )
+                  .then((response) {
+                    print(response.body);
+                  });
+            },
+            child: Icon(Icons.add),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              http
+                  .post(
+                    Uri.parse("${baseUrl}/get-documents"),
+                    headers: {"Content-Type": "application/json"},
+                  )
+                  .then((response) {
+                    print(response.body);
+                  });
+            },
+            child: Icon(Icons.add),
+          ),
+        ],
+      ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () async {
       //     // List<ActivityModel> activities = await getActivities();
