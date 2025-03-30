@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hoohacks/authentication_page.dart';
+import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase_options.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/states/activity_state.dart';
@@ -28,9 +29,12 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
+          appBarTheme: const AppBarTheme(
+            backgroundColor: ctaColor,
+          ),
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 255, 64, 0),
-          ),
+          ).copyWith(),
         ),
         home:
             FirebaseAuth.instance.currentUser == null

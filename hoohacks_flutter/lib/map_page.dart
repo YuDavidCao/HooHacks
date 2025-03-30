@@ -30,10 +30,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
 
   late AnimationController _animationController;
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(38.033554, -78.507980),
-    zoom: 14.4746,
-  );
+  CameraPosition camera = CameraPosition(target: uvaLatLng, zoom: 16);
 
   Set<Marker> _markers = {};
   Map<Circle, CircleConfig> _circles = {};
@@ -41,9 +38,19 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   List<String> _categories = [];
   String distanceFilter = "none";
 
-  LatLng _currentCameraPosition = const LatLng(38.033554, -78.507980);
+  LatLng _currentCameraPosition = uvaLatLng;
+  LatLng yourLocation = uvaLatLng;
+
+  double zoomLevel = 16;
 
   List<ActivityModel> _activities = [];
+
+  late BitmapDescriptor yellowMarker;
+  late BitmapDescriptor yellowOrangeMarker;
+  late BitmapDescriptor orangeMarker;
+  late BitmapDescriptor orangeRedMarker;
+  late BitmapDescriptor redMarker;
+  late BitmapDescriptor currentMarker;
 
   void onFilterChanged() async {
     _activities = await getFilteredActivities(
@@ -53,54 +60,80 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       distanceFilter, // distance,
       _searchController.text, // searchString,
     );
-    BitmapDescriptor.asset(
-      const ImageConfiguration(size: Size(20, 20)),
-      'assets/markers/m1.png',
-    ).then((icon) {
-      setState(() {
-        _markers =
-            _activities.map((activity) {
-              return Marker(
-                markerId: MarkerId(activity.id!),
-                position: LatLng(activity.latitude, activity.longitude),
-                infoWindow: InfoWindow(title: activity.title),
-                anchor: Offset(0.5, 0.5),
-                icon: icon,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => ActivityPage(activityModel: activity),
-                    ),
-                  );
-                },
-              );
-            }).toSet();
-        for (ActivityModel activity in _activities) {
-          _circles[Circle(
-            circleId: CircleId(activity.id!),
-            center: LatLng(activity.latitude, activity.longitude),
-            radius: 0,
-            fillColor: Colors.yellow.withOpacity(0.5),
-            strokeColor: Colors.transparent,
-            strokeWidth: 0,
-          )] = CircleConfig(
-            radius: 10,
-            fillColor: Colors.yellow.withOpacity(0.5),
-          );
-        }
-        if (!init) {
-          _animationController =
-              AnimationController(
-                  vsync: this,
-                  duration: const Duration(seconds: 2),
-                )
-                ..addListener(_updateCircles)
-                ..repeat();
-        }
-        init = true;
-      });
+
+    setState(() {
+      _markers =
+          _activities.map((activity) {
+            return Marker(
+              markerId: MarkerId(activity.id!),
+              position: LatLng(activity.latitude, activity.longitude),
+              infoWindow: InfoWindow(title: activity.title),
+              anchor: Offset(0.5, 0.5),
+              icon: weightToMarker(activity.weight!),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActivityPage(activityModel: activity),
+                  ),
+                );
+              },
+            );
+          }).toSet();
+      _markers.add(
+        Marker(
+          markerId: const MarkerId("current"),
+          position: _currentCameraPosition,
+          infoWindow: const InfoWindow(title: "Current Location"),
+          anchor: const Offset(0.5, 0.5),
+          icon: currentMarker,
+        ),
+      );
+      for (ActivityModel activity in _activities) {
+        print(
+          (40000000 *
+                  activity.weight! *
+                  (1 /
+                      zoomLevel /
+                      zoomLevel /
+                      zoomLevel /
+                      zoomLevel /
+                      zoomLevel /
+                      zoomLevel))
+              .round(),
+        );
+        _circles[Circle(
+          circleId: CircleId(activity.id!),
+          center: LatLng(activity.latitude, activity.longitude),
+          radius: 0,
+          fillColor: weightToColor(activity.weight!).withOpacity(0.5),
+          strokeColor: Colors.transparent,
+          strokeWidth: 0,
+        )] = CircleConfig(
+          radius:
+              (400000000 *
+                      activity.weight! *
+                      (1 /
+                          zoomLevel /
+                          zoomLevel /
+                          zoomLevel /
+                          zoomLevel /
+                          zoomLevel /
+                          zoomLevel))
+                  .round(),
+          fillColor: weightToColor(activity.weight!).withOpacity(0.5),
+        );
+      }
+      if (!init) {
+        _animationController =
+            AnimationController(
+                vsync: this,
+                duration: const Duration(seconds: 2),
+              )
+              ..addListener(_updateCircles)
+              ..repeat();
+      }
+      init = true;
     });
   }
 
@@ -142,10 +175,77 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   late Function onActivityChanged;
 
+  BitmapDescriptor weightToMarker(double weight) {
+    if (weight < 0.2) {
+      return yellowMarker;
+    } else if (weight < 0.4) {
+      return yellowOrangeMarker;
+    } else if (weight < 0.6) {
+      return orangeMarker;
+    } else if (weight < 0.8) {
+      return orangeRedMarker;
+    } else {
+      return redMarker;
+    }
+  }
+
+  Color weightToColor(double weight) {
+    if (weight < 0.2) {
+      return Colors.yellow;
+    } else if (weight < 0.4) {
+      return Colors.orange;
+    } else if (weight < 0.6) {
+      return Colors.deepOrange;
+    } else if (weight < 0.8) {
+      return Colors.red;
+    } else {
+      return Colors.redAccent;
+    }
+  }
+
+  void initMarkers() async {
+    List<Future<BitmapDescriptor>> futures = [
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/m1.png',
+      ),
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/m2.png',
+      ),
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/m3.png',
+      ),
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/m4.png',
+      ),
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/m5.png',
+      ),
+      BitmapDescriptor.asset(
+        const ImageConfiguration(size: Size(20, 20)),
+        'assets/markers/current.png',
+      ),
+    ];
+
+    final results = await Future.wait(futures);
+    yellowMarker = results[0];
+    yellowOrangeMarker = results[1];
+    orangeMarker = results[2];
+    orangeRedMarker = results[3];
+    redMarker = results[4];
+    currentMarker = results[5];
+
+    onFilterChanged();
+  }
+
   @override
   void initState() {
     super.initState();
-    onFilterChanged();
+    initMarkers();
     onActivityChanged = () {
       onFilterChanged();
     };
@@ -170,31 +270,8 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
         newCircles[newCircle] = _circles[circle]!;
       }
       _circles = newCircles;
-      // for (Circle circle in _circles.keys) {
-      //   _circles[circle] = _circles[circle]!.copyWith(
-      //     radius: currentRadius.toInt(),
-      //     fillColor: _circles[circle]!.fillColor.withOpacity(currentOpacity),
-      //   );
-      // }
-      // _circles =
-      //     _circles.entries.map((MapEntry<Circle, CircleConfig> entry) {
-      //       return entry.key.copyWith(
-      //         radiusParam: entry.value.radius,
-      //         fillColorParam: entry.value.fillColor.withOpacity(currentOpacity),
-      //       );
-      //     }).toSet();
     });
   }
-
-  //   setState(() {
-  //   _circles =
-  //       _circles.map((circle) {
-  //         return circle.copyWith(
-  //           radiusParam: currentRadius,
-  //           fillColorParam: Colors.yellow.withOpacity(currentOpacity),
-  //         );
-  //       }).toSet();
-  // });
 
   void showFilterBottomSheet() {
     showModalBottomSheet(
@@ -243,10 +320,15 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       body: Stack(
         children: [
           GoogleMap(
-            onCameraMove:
-                (position) => _currentCameraPosition = position.target,
+            onCameraMove: (position) {
+              _currentCameraPosition = position.target;
+              setState(() {
+                zoomLevel = position.zoom;
+              });
+              print(zoomLevel);
+            },
             mapType: MapType.normal,
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: camera,
             markers: _markers,
             circles: _circles.keys.toSet(),
             onMapCreated: (GoogleMapController controller) {
@@ -292,9 +374,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
                       hintText: 'Search',
                       border: InputBorder.none,
                     ),
-                    onSubmitted: (value) => {
-                      onFilterChanged(),
-                    },
+                    onSubmitted: (value) => {onFilterChanged()},
                   ),
                 ),
                 IconButton(
@@ -306,23 +386,73 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               ],
             ),
           ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 15,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: null,
+                  onPressed: () {
+                    setState(() {
+                      yourLocation = LatLng(
+                        _currentCameraPosition.latitude,
+                        _currentCameraPosition.longitude,
+                      );
+                      onFilterChanged();
+                    });
+                  },
+                  label: Text("Update Location"),
+                  backgroundColor: ctaColor,
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            left: 15,
+            bottom: 15,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FloatingActionButton(
+                  heroTag: null,
+                  onPressed: () {
+                    _controller.future.then((controller) {
+                      zoomLevel = 16;
+                      controller.animateCamera(
+                        CameraUpdate.newCameraPosition(
+                          CameraPosition(target: uvaLatLng, zoom: 16),
+                        ),
+                      );
+                    });
+                  },
+                  child: const Icon(Icons.school),
+                  backgroundColor: ctaColor,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _determinePosition().then((position) {
             _controller.future.then((controller) {
+              zoomLevel = 16;
               controller.animateCamera(
                 CameraUpdate.newCameraPosition(
                   CameraPosition(
                     target: LatLng(position.latitude, position.longitude),
-                    zoom: 14.4746,
+                    zoom: 16,
                   ),
                 ),
               );
             });
           });
         },
+        backgroundColor: ctaColor,
         child: const Icon(Icons.my_location),
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "MapPage"),

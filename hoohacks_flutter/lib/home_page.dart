@@ -143,56 +143,56 @@ class _HomePageState extends State<HomePage>
         ],
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // List<ActivityModel> activities = await getActivities();
-          // log(activities.toString());
-          // http
-          //     .post(
-          //       Uri.parse(
-          //         "https://b5d8-199-111-224-44.ngrok-free.app/get-activity",
-          //       ),
-          //       body: jsonEncode({
-          //         "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
-          //         "Longitude": "38.033554",
-          //         "Latitude": "-78.507980",
-          //         "Categories": ["1st Year", "Lectures & Seminars"],
-          //         "Distances": 1,
-          //         "SearchString": "",
-          //       }),
-          //       headers: {"Content-Type": "application/json"},
-          //     )
-          //     .then((response) {
-          //       log(response.body);
-          //     });
-          http
-              .post(
-                Uri.parse("${baseUrl}/get-activity"),
-                body: jsonEncode({
-                  "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
-                  "Longitude": "-78.507980",
-                  "Latitude": "38.033554",
-                  "Categories": [],
-                  "Distances": "0.1",
-                  "SearchString": "",
-                }),
-                headers: {"Content-Type": "application/json"},
-              )
-              .then((response) {
-                final a =
-                    (jsonDecode(response.body)["activities"] as List)
-                        .map(
-                          (e) => ActivityModel.fromFlask(
-                            e as Map<String, dynamic>,
-                            e['Id'],
-                          ),
-                        )
-                        .toList();
-                print(a.length);
-                log(a.toString());
-              });
-        },
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     // List<ActivityModel> activities = await getActivities();
+      //     // log(activities.toString());
+      //     // http
+      //     //     .post(
+      //     //       Uri.parse(
+      //     //         "https://b5d8-199-111-224-44.ngrok-free.app/get-activity",
+      //     //       ),
+      //     //       body: jsonEncode({
+      //     //         "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
+      //     //         "Longitude": "38.033554",
+      //     //         "Latitude": "-78.507980",
+      //     //         "Categories": ["1st Year", "Lectures & Seminars"],
+      //     //         "Distances": 1,
+      //     //         "SearchString": "",
+      //     //       }),
+      //     //       headers: {"Content-Type": "application/json"},
+      //     //     )
+      //     //     .then((response) {
+      //     //       log(response.body);
+      //     //     });
+      //     http
+      //         .post(
+      //           Uri.parse("${baseUrl}/get-activity"),
+      //           body: jsonEncode({
+      //             "Uid": "PYJrf3DWkVRcRhMmPAtgocAd79T2",
+      //             "Longitude": "-78.507980",
+      //             "Latitude": "38.033554",
+      //             "Categories": [],
+      //             "Distances": "0.1",
+      //             "SearchString": "",
+      //           }),
+      //           headers: {"Content-Type": "application/json"},
+      //         )
+      //         .then((response) {
+      //           final a =
+      //               (jsonDecode(response.body)["activities"] as List)
+      //                   .map(
+      //                     (e) => ActivityModel.fromFlask(
+      //                       e as Map<String, dynamic>,
+      //                       e['Id'],
+      //                     ),
+      //                   )
+      //                   .toList();
+      //           print(a.length);
+      //           log(a.toString());
+      //         });
+      //   },
+      // ),
     );
   }
 }

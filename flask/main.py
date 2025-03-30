@@ -90,7 +90,7 @@ def get_activities():
         downvotes = activity.get("Downvotes", 0)
         upvotes = activity.get("Upvotes", 0)
 
-        activity["weight"] = get_weight(distance, participants, upvotes, downvotes)
+        activity["Weight"] = get_weight(distance, participants, upvotes, downvotes)
 
         activities.append(activity | {"Id": doc.id})  # Add the document ID to the activity
     # compare embeddings of user_interests to activity["Embeddings"]

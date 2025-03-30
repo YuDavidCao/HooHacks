@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 RegExp emailRegex = RegExp(r'^[a-zA-Z0-9]{5,6}@virginia\.edu$');
 
@@ -38,3 +39,5 @@ const List<String> distanceFilters = [
 const Color ctaColor = Colors.orange;
 
 const String baseUrl = "http://127.0.0.1:5000";
+
+const LatLng uvaLatLng = LatLng(38.033554, -78.507980);
