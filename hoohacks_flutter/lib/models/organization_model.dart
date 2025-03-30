@@ -7,6 +7,8 @@ class OrganizationModel {
   final List<String> admins;
   final List<String> activities;
   final String email;
+  final String? location;
+  final String? profilePicture;
 
   OrganizationModel({
     this.id,
@@ -17,6 +19,8 @@ class OrganizationModel {
     required this.admins,
     required this.activities,
     required this.email,
+    required this.location,
+    this.profilePicture,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +33,28 @@ class OrganizationModel {
       'Admins': admins,
       'Activities': activities,
       'Email': email,
+      'Location': location,
+      'ProfilePicture': profilePicture,
     };
+  }
+
+  static OrganizationModel fromMap(Map<String, dynamic> map, String id) {
+    return OrganizationModel(
+      id: id,
+      name: map['Name'],
+      description: map['Description'],
+      createdDate: DateTime.parse(map['CreatedDate']),
+      members: List<String>.from(map['Members']),
+      admins: List<String>.from(map['Admins']),
+      activities: List<String>.from(map['Activities']),
+      email: map['Email'],
+      location: map['Location'],
+      profilePicture: map['ProfilePicture'],
+    );
+  }
+
+  @override
+  String toString() {
+    return 'OrganizationModel{id: $id, name: $name, description: $description, createdDate: $createdDate, members: $members, admins: $admins, activities: $activities, email: $email, location: $location, profilePicture: $profilePicture}';
   }
 }

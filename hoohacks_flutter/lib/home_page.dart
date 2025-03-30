@@ -161,12 +161,18 @@ class _HomePageState extends State<HomePage>
                                         children: [
                                           Text(
                                             activity.title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
-                                          Text(activity.description),
+                                          Text(
+                                            activity.description,
+                                            maxLines: 5,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                           Wrap(
                                             runSpacing: -10,
                                             children: [

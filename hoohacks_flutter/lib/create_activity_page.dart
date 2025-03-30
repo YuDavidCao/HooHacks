@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
+import 'package:hoohacks/models/organization_model.dart';
+import 'package:hoohacks/organization/organization_detail_page.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateActivityPage extends StatefulWidget {
@@ -24,6 +26,8 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
   final TextEditingController _locationController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  OrganizationModel? organizationModel;
 
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 1));
@@ -167,7 +171,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      _titleController.clear();
+                      _contactEmailController.clear();
                     },
                   ),
                 ),
@@ -180,6 +184,53 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                 keyboardType: TextInputType.emailAddress,
               ),
             ),
+            Container(
+              padding: middleWidgetPadding,
+              child: FutureBuilder<List<OrganizationModel>>(
+                future: getMyOrganizations(),
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<List<OrganizationModel>> snapshot,
+                ) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    List<DropdownMenuItem<String>> items =
+                        snapshot.data!.map((OrganizationModel organization) {
+                          return DropdownMenuItem<String>(
+                            value: organization.id,
+                            child: Text(organization.name),
+                          );
+                        }).toList();
+                    items.add(
+                      DropdownMenuItem<String>(
+                        value: null,
+                        child: const Text('None'),
+                      ),
+                    );
+                    return DropdownButtonFormField<String>(
+                      items: items,
+                      onChanged: (String? value) {
+                        setState(() {
+                          organizationModel = snapshot.data!.firstWhere(
+                            (org) => org.id == value,
+                          );
+                        });
+                      },
+                      value: organizationModel?.id,
+                      decoration: InputDecoration(
+                        labelText: "Organization",
+                        border: const OutlineInputBorder(),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(strokeWidth: 1),
+                    );
+                  }
+                },
+              ),
+            ),
             Padding(
               padding: middleWidgetPadding,
               child: TextFormField(
@@ -190,7 +241,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.delete),
                     onPressed: () {
-                      _titleController.clear();
+                      _locationController.clear();
                     },
                   ),
                 ),
@@ -371,6 +422,7 @@ class _CreateActivityPageState extends State<CreateActivityPage> {
                   _categories,
                   _contactEmailController.text,
                   _locationController.text,
+                  organizationModel?.id,
                   activityImage,
                   context,
                 );

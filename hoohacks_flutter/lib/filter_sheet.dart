@@ -161,6 +161,30 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
             ],
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                child: Text(
+                  'Bookmarked Only',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                child: Switch(
+                  value: bookMarked,
+                  onChanged: (value) {
+                    setState(() {
+                      bookMarked = value;
+                      widget.setBookMarked(value);
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

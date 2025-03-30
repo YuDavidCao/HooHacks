@@ -5,6 +5,9 @@ import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/firebase/firebase_firestore.dart';
 import 'package:hoohacks/map_page.dart';
 import 'package:hoohacks/models/activity_model.dart';
+import 'package:hoohacks/models/organization_model.dart';
+import 'package:hoohacks/organization/organization_detail_page.dart';
+import 'package:hoohacks/organization/organization_page.dart';
 import 'package:hoohacks/states/user_state.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -321,6 +324,55 @@ class _ActivityPageState extends State<ActivityPage> {
               ],
             ),
           ),
+          if (widget.activityModel.organization != null)
+            Padding(
+              padding: middleWidgetPadding,
+              child: FutureBuilder<OrganizationModel?>(
+                future: getOrganizationsById(
+                  widget.activityModel.organization!,
+                ),
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<OrganizationModel?> snapshot,
+                ) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.business),
+                            const SizedBox(width: 10),
+                            Text(snapshot.data!.name),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => OrganizationDetailPage(
+                                      organizationModel: snapshot.data!,
+                                    ),
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.keyboard_arrow_right),
+                        ),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(strokeWidth: 1),
+                    );
+                  }
+                },
+              ),
+            ),
           if (widget.activityModel.locationName != null)
             Padding(
               padding: middleWidgetPadding,
