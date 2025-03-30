@@ -299,3 +299,17 @@ void deleteActivity(String activityId, String? imageUrl) async {
     print("Error deleting activity: $e");
   }
 }
+
+Future<ActivityModel?> getActivityById(String activityId) async {
+  try {
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection("activities")
+            .doc(activityId)
+            .get();
+    return ActivityModel.fromMap(snapshot.data()!, snapshot.id);
+  } catch (e) {
+    print("Error getting activity by ID: $e");
+  }
+  return null;
+}

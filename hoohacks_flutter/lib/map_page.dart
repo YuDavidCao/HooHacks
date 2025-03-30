@@ -17,7 +17,8 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+  final ActivityModel? activityModel;
+  const MapPage({super.key, this.activityModel});
 
   @override
   State<MapPage> createState() => MapPageState();
@@ -30,7 +31,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
 
   late AnimationController _animationController;
-  CameraPosition camera = CameraPosition(target: uvaLatLng, zoom: 16);
+  late CameraPosition camera;
 
   Set<Marker> _markers = {};
   Map<Circle, CircleConfig> _circles = {};
@@ -242,14 +243,33 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
     onFilterChanged();
   }
 
+  late final ActivityState activityState;
+
   @override
   void initState() {
     super.initState();
+    if (widget.activityModel != null) {
+      _currentCameraPosition = LatLng(
+        widget.activityModel!.latitude,
+        widget.activityModel!.longitude,
+      );
+    }
+    camera =
+        widget.activityModel != null
+            ? CameraPosition(
+              target: LatLng(
+                _currentCameraPosition.latitude,
+                _currentCameraPosition.longitude,
+              ),
+              zoom: 16,
+            )
+            : CameraPosition(target: uvaLatLng, zoom: 16);
     initMarkers();
     onActivityChanged = () {
       onFilterChanged();
     };
-    Provider.of<ActivityState>(context, listen: false).addListener(() {
+    activityState = Provider.of<ActivityState>(context, listen: false);
+    activityState.addListener(() {
       onActivityChanged();
     });
   }
@@ -307,7 +327,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
       controller.dispose();
     });
     _searchController.dispose();
-    Provider.of<ActivityState>(context, listen: false).removeListener(() {
+    activityState.removeListener(() {
       onActivityChanged();
     });
     // _listener.ca

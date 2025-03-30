@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hoohacks/chat_page.dart';
+import 'package:hoohacks/interest_page.dart';
 import 'package:hoohacks/constant.dart';
 import 'package:hoohacks/home_page.dart';
 import 'package:hoohacks/map_page.dart';
@@ -49,13 +49,13 @@ class GlobalBottomNavigationBar extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.interests,
-              color: pageName == "ChatPage" ? ctaColor : Colors.black,
+              color: pageName == "InterestPage" ? ctaColor : Colors.black,
             ),
             onPressed: () {
-              if (pageName != "ChatPage") {
+              if (pageName != "InterestPage") {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ChatPage()),
+                  MaterialPageRoute(builder: (context) => InterestPage()),
                 );
               }
             },

@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage>
             tabs: [
               const Tab(icon: Icon(Icons.calendar_month), text: 'Upcoming'),
               const Tab(icon: Icon(Icons.celebration), text: 'All Activities'),
-              const Tab(icon: Icon(Icons.create), text: 'Created'),
+              const Tab(icon: Icon(Icons.person), text: 'By Me'),
             ],
           ),
           Flexible(
@@ -123,11 +123,14 @@ class _HomePageState extends State<HomePage>
                                       topLeft: Radius.circular(10),
                                       topRight: Radius.circular(10),
                                     ),
-                                    child: Image.network(
-                                      activity.imageUrl!,
-                                      fit: BoxFit.cover,
-                                      height: 100,
-                                      width: double.infinity,
+                                    child: Hero(
+                                      tag: activity.imageUrl!,
+                                      child: Image.network(
+                                        activity.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        height: 100,
+                                        width: double.infinity,
+                                      ),
                                     ),
                                   ),
                                 Padding(
@@ -179,41 +182,41 @@ class _HomePageState extends State<HomePage>
         ],
       ),
       bottomNavigationBar: GlobalBottomNavigationBar(pageName: "HomePage"),
-      floatingActionButton: Wrap(
-        children: [
-          FloatingActionButton(
-            onPressed: () {
-              http
-                  .get(
-                    Uri.parse("${baseUrl}/get-documents"),
-                    headers: {"Content-Type": "application/json"},
-                  )
-                  .then((response) {
-                    print(response.body);
-                  });
-            },
-            child: Icon(Icons.get_app),
-          ),
-          const SizedBox(width: 10),
-          FloatingActionButton(
-            onPressed: () {
-              http
-                  .post(
-                    Uri.parse("${baseUrl}/get-relevant-activities"),
-                    body: jsonEncode({
-                      "EndDate": DateTime.now().microsecondsSinceEpoch,
-                      "Interests": "I want to eat apple!",
-                    }),
-                    headers: {"Content-Type": "application/json"},
-                  )
-                  .then((response) {
-                    print(response.body);
-                  });
-            },
-            child: Icon(Icons.add),
-          ),
-        ],
-      ),
+      // floatingActionButton: Wrap(
+      //   children: [
+      //     FloatingActionButton(
+      //       onPressed: () {
+      //         http
+      //             .get(
+      //               Uri.parse("${baseUrl}/get-documents"),
+      //               headers: {"Content-Type": "application/json"},
+      //             )
+      //             .then((response) {
+      //               print(response.body);
+      //             });
+      //       },
+      //       child: Icon(Icons.get_app),
+      //     ),
+      //     const SizedBox(width: 10),
+      //     FloatingActionButton(
+      //       onPressed: () {
+      //         http
+      //             .post(
+      //               Uri.parse("${baseUrl}/get-relevant-activities"),
+      //               body: jsonEncode({
+      //                 "EndDate": DateTime.now().microsecondsSinceEpoch,
+      //                 "Interests": "I want to eat apple!",
+      //               }),
+      //               headers: {"Content-Type": "application/json"},
+      //             )
+      //             .then((response) {
+      //               print(response.body);
+      //             });
+      //       },
+      //       child: Icon(Icons.add),
+      //     ),
+      //   ],
+      // ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () async {
       //     // List<ActivityModel> activities = await getActivities();

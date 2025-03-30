@@ -54,7 +54,10 @@ class _ActivityPageState extends State<ActivityPage> {
           if (widget.activityModel.imageUrl != null)
             Padding(
               padding: middleWidgetPadding,
-              child: Image.network(widget.activityModel.imageUrl!),
+              child: Hero(
+                tag: widget.activityModel.imageUrl!,
+                child: Image.network(widget.activityModel.imageUrl!),
+              ),
             ),
           Container(
             padding: middleWidgetPadding,

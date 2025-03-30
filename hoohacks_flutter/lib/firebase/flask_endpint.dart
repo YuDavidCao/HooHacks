@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hoohacks/constant.dart';
@@ -62,4 +63,25 @@ Future<void> storeDocumentInChroma(
     }),
     headers: {"Content-Type": "application/json"},
   );
+}
+
+Future<Map<String, String>> getRelaventActivity(String interests) async {
+  final response = await http.post(
+    Uri.parse("$baseUrl/get-relevant-activities"),
+    body: jsonEncode({
+      "EndDate": DateTime.now().microsecondsSinceEpoch,
+      "Interests": interests,
+    }),
+    headers: {"Content-Type": "application/json"},
+  );
+  final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+  final results = jsonResponse['results'] as Map<String, dynamic>;
+  final List<dynamic> ids = (results['ids'] as List)[0];
+  final List<dynamic> documents = (results['documents'] as List)[0];
+
+  final Map<String, String> idToText = {};
+  for (int i = 0; i < ids.length; i++) {
+    idToText[ids[i]] = documents[i];
+  }
+  return idToText;
 }

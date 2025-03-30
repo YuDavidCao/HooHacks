@@ -7,11 +7,11 @@
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app uses your camera or photo library to upload images for activities and profile</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>This app needs access to location when open.</string>
+		<string>This app needs access to location to get activities.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Hoohacks</string>
+		<string>HoosMap</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -19,7 +19,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>hoohacks</string>
+		<string>HoosMap</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
