@@ -26,26 +26,31 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ActivityState()),
         ChangeNotifierProvider(create: (context) => userState),
       ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
-          colorScheme: ColorScheme(
-            brightness: Brightness.light,
-            primary: ctaColor,
-            onPrimary: Colors.black,
-            secondary: ctaColor,
-            onSecondary: Colors.black,
-            error: Colors.red,
-            onError: Colors.red,
-            surface: Colors.white,
-            onSurface: Colors.black,
+      child: GestureDetector(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            appBarTheme: const AppBarTheme(backgroundColor: ctaColor),
+            colorScheme: ColorScheme(
+              brightness: Brightness.light,
+              primary: ctaColor,
+              onPrimary: Colors.black,
+              secondary: ctaColor,
+              onSecondary: Colors.black,
+              error: Colors.red,
+              onError: Colors.red,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
+          home:
+              FirebaseAuth.instance.currentUser == null
+                  ? const AuthenticationPage()
+                  : const HomePage(),
         ),
-        home:
-            FirebaseAuth.instance.currentUser == null
-                ? const AuthenticationPage()
-                : const HomePage(),
       ),
     );
   }

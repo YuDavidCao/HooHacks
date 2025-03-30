@@ -44,6 +44,7 @@ class UserState extends ChangeNotifier {
       if (user == null) {
         clearUserModel();
       } else {
+        getUser();
         subscription = FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)

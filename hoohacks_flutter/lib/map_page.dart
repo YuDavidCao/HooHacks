@@ -15,6 +15,7 @@ import 'package:hoohacks/states/activity_state.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapPage extends StatefulWidget {
   final ActivityModel? activityModel;
@@ -45,6 +46,8 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
   double zoomLevel = 16;
 
   List<ActivityModel> _activities = [];
+
+  MapType mapType = MapType.normal;
 
   late BitmapDescriptor yellowMarker;
   late BitmapDescriptor yellowOrangeMarker;
@@ -245,9 +248,22 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   late final ActivityState activityState;
 
+  void getMapType() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? mapType = prefs.getString('mapType');
+    if (mapType != null) {
+      setState(() {
+        this.mapType = MapType.values.firstWhere(
+          (MapType type) => type.toString() == mapType,
+        );
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    getMapType();
     if (widget.activityModel != null) {
       _currentCameraPosition = LatLng(
         widget.activityModel!.latitude,
@@ -347,7 +363,7 @@ class MapPageState extends State<MapPage> with TickerProviderStateMixin {
               });
               print(zoomLevel);
             },
-            mapType: MapType.normal,
+            mapType: mapType,
             initialCameraPosition: camera,
             markers: _markers,
             circles: _circles.keys.toSet(),

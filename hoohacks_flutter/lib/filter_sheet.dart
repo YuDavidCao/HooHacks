@@ -25,7 +25,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
   @override
   void initState() {
-    distanceFilter =  widget.distanceFilter;
+    distanceFilter = widget.distanceFilter;
     super.initState();
   }
 

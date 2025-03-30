@@ -8,6 +8,7 @@ import 'package:hoohacks/edit_profile_info_page.dart';
 import 'package:hoohacks/firebase/firebase_auth.dart';
 import 'package:hoohacks/firebase/firebase_storage.dart';
 import 'package:hoohacks/global_bottom_navigation_bar.dart';
+import 'package:hoohacks/settings_sheet.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -112,6 +113,48 @@ class _ProfilePageState extends State<ProfilePage> {
                               Icon(Icons.person),
                               SizedBox(width: 10),
                               Text("Profile Info"),
+                            ],
+                          ),
+                          Icon(Icons.arrow_forward),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Divider(color: Theme.of(context).colorScheme.primary),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () async {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        builder: (context) {
+                          return DraggableScrollableSheet(
+                            expand: false,
+                            initialChildSize: 0.6,
+                            minChildSize: 0.2,
+                            maxChildSize: 0.6,
+                            builder: ((context, scrollController) {
+                              return SettingsSheet(
+                                scrollController: scrollController,
+                              );
+                            }),
+                          );
+                        },
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(2),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.settings),
+                              SizedBox(width: 10),
+                              Text("Map Settings"),
                             ],
                           ),
                           Icon(Icons.arrow_forward),
