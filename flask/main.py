@@ -1,11 +1,19 @@
 from flask import Flask, request, jsonify 
+from dotenv import load_dotenv
+import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from flask_cors import CORS
 import math 
 from datetime import datetime, timezone
-import chromadb 
+import chromadb
+from google import genai
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
 
@@ -19,6 +27,18 @@ db = firestore.client()
 collection = db.collection("message")
 users_collection = db.collection("users")
 activities_collection = db.collection("activities")
+
+# Chroma DB setup 
+client = chromadb.Client()
+
+def get_or_create_collection(collection_name):
+    try:
+        # Try to retrieve the collection
+        collection = client.get_collection(collection_name)
+    except chromadb.errors.InvalidCollectionException:
+        # If the collection doesn't exist, create it
+        collection = client.create_collection(collection_name)
+    return collection
 
 @app.route('/get-messages', methods=['GET'])
 def get_messages():
@@ -38,7 +58,6 @@ def get_activities():
     user_categories = data.get("Categories", []) 
     user_distance = convert_to_kilometers(float(data.get("Distances", 7.0)))
     user_search = data.get("SearchString", "")
-    user_interests = data.get("Interests", "")
 
     docs = activities_collection.get()  # Fetch all documents from the "activity" collection
     activities = []  # Store filtered activities
@@ -191,6 +210,38 @@ def get_weight(distance, participants, upvotes, downvotes):
     # Ensure the result is between 0 and 1
     return max(0, min(1, final_weight))
 
+@app.route('/store-activity', methods=['POST'])
+def store_activity():
+    data = request.json
+    if not data:
+        return jsonify({"error": "Invalid request"}), 400
+    id = data.get("Id") 
+    combined = data.get("Title", "") + " " + data.get("Description", "") # combined String with title and description to convert to embedding 
+    endDate = int(data.get("EndDate"))
+
+    result_embeddings = gemini_client.models.embed_content(
+        model="gemini-embedding-exp-03-07",
+        contents=combined
+    ).embeddings # array of embeddings basd on combined string 
+
+    collection_name = "activity_embeddings"
+    collection = get_or_create_collection(collection_name)
+
+    try:
+        collection.add(
+            documents=[combined],
+            embeddings=[result_embeddings[0].values],
+            ids=[id],
+            metadatas=[{'endDate': endDate}]
+        )
+    except Exception as e:
+        # print(e)
+        return jsonify({"error": "Failed to add document", "details": str(e)}), 500
+    return jsonify({"message": "Activity stored successfully"}), 200 
+
+@app.route('/get-relevant-activities', methods=['POST'])
+def get_relevant_activities():
+    pass 
 
 @app.route('/get-users', methods=['GET'])
 def get_users():
